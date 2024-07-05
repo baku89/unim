@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="100" src="./public/icon.png" />
+  <img width="100" src="./public/favicon.svg" />
   <h1>Unim</h1>
   <img width="600" src="./screenshot.png" alt="Screenshot of the app" />
 	<div>
