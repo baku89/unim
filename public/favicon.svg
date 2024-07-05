@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 260 260">
+	<defs>
+		<style>
+			@media (prefers-color-scheme: light) { :root { filter: none; } }
+			@media (prefers-color-scheme: dark) { :root { filter: invert(100%); } }
+			
+			.c {
+			fill: none;
+			stroke: #000;
+			stroke-linecap: round;
+			stroke-linejoin: round;
+			stroke-width: 17.6px;
+			}
+		</style>
+	</defs>
+	<circle class="c" cx="130" cy="130" r="110">
+	</circle>
+	<path class="c" d="M130,20c60.75,0,110,49.25,110,110s-49.25,110-110,110c-60.75,0-110-49.25-110-110S69.25,20,130,20Z" />
+	<path class="c" d="M52.22,207.78c19.53,19.53,51.18,19.53,70.71,0,9.76-9.76,14.64-22.56,14.64-35.36V20.31" />
+	<line class="c" x1="137.57" y1="130" x2="240" y2="130" />
+	<line class="c" x1="188.79" y1="100" x2="188.79" y2="160" />
+</svg>

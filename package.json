@@ -1,0 +1,47 @@
+{
+	"name": "unim",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build"
+	},
+	"workspaces": [
+		"dev_modules/*"
+	],
+	"devDependencies": {
+		"@baku89/pave": "^0.2.0",
+		"@iconify/vue": "^4.1.1",
+		"@types/dateformat": "^5.0.2",
+		"@types/howler": "^2.2.11",
+		"@types/wicg-file-system-access": "^2023.10.4",
+		"@typescript-eslint/eslint-plugin": "^6.19.1",
+		"@typescript-eslint/parser": "^6.19.1",
+		"@vitejs/plugin-vue": "^5.0.3",
+		"@vueuse/core": "^10.7.2",
+		"eslint": "^8.56.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-jest": "^27.6.3",
+		"eslint-plugin-simple-import-sort": "^10.0.0",
+		"eslint-plugin-unused-imports": "^3.0.0",
+		"eslint-plugin-vue": "^9.20.1",
+		"floating-vue": "^5.2.2",
+		"howler": "^2.2.4",
+		"linearly": "^0.32.0",
+		"lodash": "^4.17.21",
+		"pinia": "^2.1.7",
+		"prettier": "^3.2.4",
+		"prettier-plugin-stylus": "^0.1.0",
+		"stylus": "^0.62.0",
+		"typescript": "^5.3.3",
+		"typescript-memoize": "^1.1.1",
+		"vite": "^5.0.12",
+		"vite-plugin-monaco-editor": "^1.1.0",
+		"vite-plugin-pwa": "^0.17.5",
+		"vue": "3.3.4",
+		"vue-eslint-parser": "^9.4.2",
+		"wavesurfer.js": "^7.7.1"
+	},
+	"dependencies": {}
+}
