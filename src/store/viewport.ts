@@ -24,22 +24,24 @@ export const useViewportStore = defineStore('viewport', () => {
 	const transform = shallowRef<mat2d | 'fit'>('fit')
 
 	const selectedShapes = computed<Shape[]>(() => {
-		if (appState.selection?.type === 'sequenceChar') {
-			const {charIndex, gap} = appState.selection
+		const shapes: Shape[] = []
 
-			const item = project.items[appState.selection.itemIndex]
+		for (const selection of appState.selections) {
+			if (selection.type === 'sequenceChar') {
+				const {charIndex, gap} = selection
 
-			if (item.type === 'glyphSequence' && !gap) {
-				return [
-					{
+				const item = project.items[selection.index]
+
+				if (item.type === 'glyphSequence' && !gap) {
+					shapes.push({
 						style: {fill: 'black'},
 						path: item.glyphs[charIndex].path,
-					},
-				]
+					})
+				}
 			}
 		}
 
-		return []
+		return shapes
 	})
 
 	const shapes = computed(() => {

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import {useMagicKeys} from '@vueuse/core'
 import * as Bndr from 'bndr-js'
 import {mat2d, vec2} from 'linearly'
 import {useBndr} from 'tweeq'
@@ -23,13 +24,13 @@ useBndr($root, root => {
 	emitter.drag().on(dd => {
 		if (dd.type === 'down') {
 			if (dd.event.target === root) {
-				appState.selection = null
+				appState.selections = []
 			}
 		} else if (dd.type === 'drag') {
-			if (appState.selection?.type !== 'items') return
+			for (const selection of appState.selections) {
+				if (selection.type !== 'item') continue
 
-			for (const index of appState.selection.indices) {
-				const item = project.items[index]
+				const item = project.items[selection.index]
 				if (item === undefined) continue
 
 				item.position = vec2.add(item.position, dd.delta)
@@ -42,21 +43,27 @@ useZUI($root, delta => {
 	transform.value = mat2d.mul(delta, transform.value)
 })
 
+const {Command} = useMagicKeys()
+
 function onSelectItem(
 	index: number,
 	char: false | {charIndex: number; gap: boolean}
 ) {
+	if (!Command.value) {
+		appState.selections = []
+	}
+
 	if (!char) {
-		appState.selection = {
-			type: 'items',
-			indices: new Set([index]),
-		}
+		appState.selections.push({
+			type: 'item',
+			index,
+		})
 	} else {
-		appState.selection = {
+		appState.selections.push({
 			type: 'sequenceChar',
-			itemIndex: index,
+			index: index,
 			...char,
-		}
+		})
 	}
 }
 
@@ -76,22 +83,6 @@ const transformStyles = computed(() => {
 		transform: `matrix(${transform.value.join(',')})`,
 	}
 })
-
-function getSelectedInfo(index: number) {
-	if (!appState.selection) return false
-
-	const item = project.items[index]
-
-	if (item === undefined) return false
-
-	if (appState.selection.type === 'items') {
-		return appState.selection.indices.has(index)
-	} else if (appState.selection.type === 'sequenceChar') {
-		return appState.selection.itemIndex === index ? appState.selection : false
-	}
-
-	return false
-}
 </script>
 
 <template>
@@ -102,7 +93,7 @@ function getSelectedInfo(index: number) {
 					:key="index"
 					v-if="item.type === 'glyphSequence'"
 					v-bind="item"
-					:selected="getSelectedInfo(index)"
+					:index="index"
 					@select="onSelectItem(index, $event)"
 				/>
 			</template>

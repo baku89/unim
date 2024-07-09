@@ -2,7 +2,7 @@ import {whenever} from '@vueuse/core'
 import {uniqueId} from 'lodash'
 import {defineStore} from 'pinia'
 import {useTweeq} from 'tweeq'
-import {ref, watch} from 'vue'
+import {ref} from 'vue'
 
 import {parseAEKeyframe} from '@/AEKeyframes'
 import {GlyphInfo, infoToGlyph} from '@/store/api'
@@ -11,12 +11,12 @@ import {useProjectStore} from './project'
 
 type Selection =
 	| {
-			type: 'items'
-			indices: Set<number>
+			type: 'item'
+			index: number
 	  }
 	| {
 			type: 'sequenceChar'
-			itemIndex: number
+			index: number
 			charIndex: number
 			gap: boolean
 	  }
@@ -24,39 +24,32 @@ type Selection =
 export const useAppStateStore = defineStore('appState', () => {
 	const project = useProjectStore()
 
-	const selection = ref<Selection | null>(null)
+	const selections = ref<Selection[]>([])
 
 	const Tq = useTweeq()
 
 	const isPlaying = ref(false)
 
-	watch(selection, (selection, prevSelection) => {
-		if (!selection || selection.type === 'items') {
-			isPlaying.value = false
-		}
-
-		if (selection?.type === 'sequenceChar') {
-			if (prevSelection?.type === 'sequenceChar') {
-				if (selection.itemIndex !== prevSelection.itemIndex) {
-					isPlaying.value = false
-				}
-			}
-		}
-	})
-
 	// Play/pause
 	whenever(isPlaying, () => {
-		if (selection.value?.type !== 'sequenceChar') {
+		if (selections.value.length === 0) {
+			isPlaying.value = false
+			return
+		}
+
+		const selection = selections.value[0]
+
+		if (selection.type !== 'sequenceChar') {
 			isPlaying.value = false
 			return
 		}
 
 		const fps = project.frameRate
 
-		const {itemIndex} = selection.value
-		let {charIndex} = selection.value
+		const {index} = selection
+		let {charIndex} = selection
 
-		const item = project.items[selection.value.itemIndex]
+		const item = project.items[index]
 
 		if (item.type !== 'glyphSequence') {
 			isPlaying.value = false
@@ -70,12 +63,14 @@ export const useAppStateStore = defineStore('appState', () => {
 
 			charIndex = (charIndex + 1) % glyphs.length
 
-			selection.value = {
-				type: 'sequenceChar',
-				itemIndex,
-				charIndex,
-				gap: false,
-			}
+			selections.value = [
+				{
+					type: 'sequenceChar',
+					index,
+					charIndex,
+					gap: false,
+				},
+			]
 
 			setTimeout(update, (1000 / fps) * glyphs[charIndex].duration)
 		}
@@ -84,31 +79,33 @@ export const useAppStateStore = defineStore('appState', () => {
 	})
 
 	function offsetSelection(offset: number) {
-		if (selection.value?.type === 'sequenceChar') {
-			const item = project.items[selection.value.itemIndex]
-			if (item.type === 'glyphSequence') {
-				selection.value.charIndex =
-					(selection.value.charIndex + offset + item.glyphs.length) %
-					item.glyphs.length
+		for (const selection of selections.value) {
+			if (selection.type === 'sequenceChar') {
+				const item = project.items[selection.index]
+				if (item.type === 'glyphSequence') {
+					selection.charIndex =
+						(selection.charIndex + offset + item.glyphs.length) %
+						item.glyphs.length
+				}
 			}
 		}
 	}
 
 	function offsetSelectedGlyphsDuration(offset: number) {
-		if (selection.value?.type === 'items') {
-			for (const index of selection.value.indices) {
-				const item = project.items[index]
+		for (const selection of selections.value) {
+			if (selection.type === 'item') {
+				const item = project.items[selection.index]
 				if (item?.type === 'glyphSequence') {
 					for (const glyph of item.glyphs) {
 						glyph.duration = Math.max(1, glyph.duration + offset)
 					}
 				}
-			}
-		} else if (selection.value?.type === 'sequenceChar') {
-			const item = project.items[selection.value.itemIndex]
-			if (item.type === 'glyphSequence') {
-				const glyph = item.glyphs[selection.value.charIndex]
-				glyph.duration = Math.max(1, glyph.duration + offset)
+			} else if (selection.type === 'sequenceChar') {
+				const item = project.items[selection.index]
+				if (item.type === 'glyphSequence') {
+					const glyph = item.glyphs[selection.charIndex]
+					glyph.duration = Math.max(1, glyph.duration + offset)
+				}
 			}
 		}
 	}
@@ -118,27 +115,58 @@ export const useAppStateStore = defineStore('appState', () => {
 			id: 'deselect',
 			bind: 'esc',
 			perform() {
-				selection.value = null
+				selections.value = []
 			},
 		},
 		{
 			id: 'delete_selected',
 			bind: 'backspace',
 			perform() {
-				if (selection.value?.type === 'items') {
-					const indices = selection.value.indices
-					project.items = project.items.filter((_, i) => !indices.has(i))
-				} else if (
-					selection.value?.type === 'sequenceChar' &&
-					!selection.value.gap
-				) {
-					const item = project.items[selection.value.itemIndex]
-					if (item.type === 'glyphSequence') {
-						item.glyphs.splice(selection.value.charIndex, 1)
+				let nextSelection: Selection[] = []
+
+				if (selections.value.length === 1) {
+					const sel = selections.value[0]
+					if (sel.type === 'sequenceChar' && !sel.gap) {
+						const {index, charIndex} = sel
+						const item = project.items[index]
+
+						if (item.type === 'glyphSequence') {
+							const nextCharIndex = Math.min(charIndex, item.glyphs.length - 2)
+							nextSelection = [
+								{
+									type: 'sequenceChar',
+									index,
+									charIndex: nextCharIndex,
+									gap: false,
+								},
+							]
+						}
 					}
 				}
 
-				selection.value = null
+				// Sort selections by index in descending order
+				const sels = selections.value.slice().sort((a, b) => {
+					if (a.type === 'sequenceChar' && b.type === 'sequenceChar') {
+						if (a.index === b.index) {
+							return b.charIndex - a.charIndex
+						}
+					}
+					return b.index - a.index
+				})
+
+				for (const selection of sels) {
+					if (selection.type === 'item') {
+						project.items.splice(selection.index, 1)
+						selections.value = []
+					} else if (selection.type === 'sequenceChar' && !selection.gap) {
+						const item = project.items[selection.index]
+						if (item.type === 'glyphSequence') {
+							item.glyphs.splice(selection.charIndex, 1)
+						}
+					}
+				}
+
+				selections.value = nextSelection
 			},
 		},
 		{
@@ -146,13 +174,15 @@ export const useAppStateStore = defineStore('appState', () => {
 			icon: 'mdi:play',
 			bind: ['space'],
 			perform() {
-				if (selection.value?.type === 'items') {
-					selection.value = {
-						type: 'sequenceChar',
-						itemIndex: [...selection.value.indices][0],
-						charIndex: 0,
-						gap: false,
-					}
+				if (selections.value[0]?.type === 'item') {
+					selections.value = [
+						{
+							type: 'sequenceChar',
+							index: selections.value[0].index,
+							charIndex: 0,
+							gap: false,
+						},
+					]
 				}
 				isPlaying.value = !isPlaying.value
 			},
@@ -210,39 +240,43 @@ export const useAppStateStore = defineStore('appState', () => {
 	function insertGlyphInfos(glyphInfos: GlyphInfo[]) {
 		const glyphs = glyphInfos.map(infoToGlyph)
 
-		if (selection.value?.type === 'items') {
-			for (const index of selection.value.indices) {
-				const item = project.items[index]
+		const firstSel = selections.value[0]
+
+		if (firstSel) {
+			if (firstSel.type === 'item') {
+				const item = project.items[firstSel.index]
 				if (item?.type === 'glyphSequence') {
 					item.glyphs.push(...glyphs)
 				}
+			} else if (firstSel.type === 'sequenceChar') {
+				const {charIndex, index, gap} = firstSel
+				const item = project.items[index]
+				if (item?.type !== 'glyphSequence') return
+				const insertIndex = charIndex + (gap ? 0 : 1)
+				item.glyphs.splice(insertIndex, 0, ...glyphs)
+				firstSel.charIndex = insertIndex + glyphs.length - 1
 			}
-		} else if (selection.value?.type === 'sequenceChar') {
-			const {charIndex, gap} = selection.value
-			const item = project.items[selection.value.itemIndex]
-			if (item?.type !== 'glyphSequence') return
-			const insertIndex = charIndex + (gap ? 0 : 1)
-			item.glyphs.splice(insertIndex, 0, ...glyphs)
-			selection.value.charIndex = insertIndex + glyphs.length - 1
 		} else {
-			const itemIndex =
-				project.items.push({
-					type: 'glyphSequence',
-					id: 'seq_' + uniqueId(),
-					color: Tq.theme.colorAccent,
-					position: [100, 100],
-					glyphs: glyphs,
-				}) - 1
+			// No selection
+			const itemCount = project.items.push({
+				type: 'glyphSequence',
+				id: 'seq_' + uniqueId(),
+				color: Tq.theme.colorAccent,
+				position: [100, 100],
+				glyphs: glyphs,
+			})
 
-			selection.value = {
-				type: 'items',
-				indices: new Set([itemIndex]),
-			}
+			selections.value = [
+				{
+					type: 'item',
+					index: itemCount - 1,
+				},
+			]
 		}
 	}
 
 	return {
-		selection,
+		selections,
 		isPlaying,
 		insertGlyphInfos,
 	}

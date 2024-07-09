@@ -7,5 +7,5 @@ interface ShapeStyle {
 
 export interface Shape {
 	style: ShapeStyle
-	path: Path
+	path: string
 }

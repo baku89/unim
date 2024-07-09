@@ -2,13 +2,14 @@
 import {computed} from 'vue'
 
 import {useAPIStore} from '@/store/api'
+import {useAppStateStore} from '@/store/appState'
 
 import {ItemGlyphSequence} from '../store/project'
 import GlyphThumb from './GlyphThumb.vue'
 
 const props = defineProps<
 	ItemGlyphSequence & {
-		selected: boolean | {charIndex: number; gap: boolean}
+		index: number
 	}
 >()
 
@@ -17,30 +18,46 @@ defineEmits<{
 }>()
 
 const api = useAPIStore()
+const appState = useAppStateStore()
+
+const isEntireSelected = computed(() => {
+	return (
+		appState.selections.findIndex(
+			selection => selection.type === 'item' && selection.index === props.index
+		) !== -1
+	)
+})
+
+const charSelections = computed(() => {
+	const gaps = new Set<number>()
+	const chars = new Set<number>()
+
+	for (const selection of appState.selections) {
+		if (selection.type !== 'sequenceChar' || selection.index !== props.index) {
+			continue
+		}
+
+		if (selection.gap) {
+			gaps.add(selection.charIndex)
+		} else {
+			chars.add(selection.charIndex)
+		}
+	}
+
+	return {gaps, chars}
+})
 
 const styles = computed(() => {
 	return {
 		transform: `translate(${props.position.map(v => v + 'px').join(',')})`,
 	}
 })
-
-function isGapSelected(index: number) {
-	if (typeof props.selected === 'boolean') return false
-
-	return props.selected.charIndex === index && props.selected.gap
-}
-
-function isCharSelected(index: number) {
-	if (typeof props.selected === 'boolean') return false
-
-	return props.selected.charIndex === index && !props.selected.gap
-}
 </script>
 
 <template>
 	<div
 		class="ItemGlyphSequence"
-		:class="{selected: selected === true}"
+		:class="{selected: isEntireSelected}"
 		:style="styles"
 	>
 		<div class="id" @pointerdown="$emit('select', false)">{{ id }}</div>
@@ -48,12 +65,12 @@ function isCharSelected(index: number) {
 			<template v-for="(glyph, charIndex) in glyphs" :key="charIndex">
 				<div
 					class="gap"
-					:class="{selected: isGapSelected(charIndex)}"
+					:class="{selected: charSelections.gaps.has(charIndex)}"
 					@pointerdown="$emit('select', {charIndex, gap: true})"
 				/>
 				<div
 					class="glyph"
-					:class="{selected: isCharSelected(charIndex)}"
+					:class="{selected: charSelections.chars.has(charIndex)}"
 					:style="{aspectRatio: glyph.duration}"
 					@pointerdown="$emit('select', {charIndex, gap: false})"
 					@click.right.prevent="api.searchByGlyph(glyph)"
@@ -76,7 +93,7 @@ function isCharSelected(index: number) {
 		outline 2px solid var(--tq-color-input-vivid-accent)
 
 	&.selected
-		outline 2px solid var(--tq-color-accent)
+		outline 2px solid var(--tq-color-accent) !important
 
 
 
@@ -113,7 +130,7 @@ function isCharSelected(index: number) {
 		outline 2px solid var(--tq-color-input-vivid-accent)
 
 	&.selected
-		outline 2px solid var(--tq-color-accent)
+		outline 2px solid var(--tq-color-accent) !important
 
 .thumb
 	width 40px
