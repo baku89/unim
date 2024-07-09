@@ -1895,7 +1895,14 @@
   resolved "https://registry.yarnpkg.com/@types/linkify-it/-/linkify-it-5.0.0.tgz#21413001973106cda1c3a9b91eedd4ccd5469d76"
   integrity sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==
 
-"@types/lodash@^4.14.202":
+"@types/lodash-es@^4.17.12":
+  version "4.17.12"
+  resolved "https://registry.yarnpkg.com/@types/lodash-es/-/lodash-es-4.17.12.tgz#65f6d1e5f80539aa7cfbfc962de5def0cf4f341b"
+  integrity sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash@*", "@types/lodash@^4.14.202":
   version "4.17.6"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.6.tgz#193ced6a40c8006cfc1ca3f4553444fb38f0e543"
   integrity sha512-OpXEVoCKSS3lQqjx9GGGOapBeuW5eUboYHRlHP9urXPX25IKZ6AnP5ZRxtVf63iieUbsHxLn8NQ5Nlftc6yzAA==
@@ -2747,15 +2754,16 @@ binary-extensions@^2.0.0:
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.3.0.tgz#f6e14a97858d327252200242d4ccfe522c445522"
   integrity sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==
 
-bndr-js@^0.14.2:
-  version "0.14.2"
-  resolved "https://registry.yarnpkg.com/bndr-js/-/bndr-js-0.14.2.tgz#43c5d9c6e86ee387593f64f9a30fc0eedf317674"
-  integrity sha512-wfDW9c/6SVQ+PWB/4o3JAIfdxttk9epnWincKtvBrb/SkRttRa6NGaRj4aiy5J2gQ7aVOyxx2rzb2c9QdZaJBw==
+bndr-js@^0.15.0:
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/bndr-js/-/bndr-js-0.15.0.tgz#ee533366829b896d627cfa57873a7f7ef864a126"
+  integrity sha512-hfzKm2t1+X55NDIv2ZoxrFAKRC2Dx9idaOd5ME/CV1Bf19PG8nbNZh1qVtKuAH5DMveN4/FOgUJrTrakvWA4HA==
   dependencies:
+    "@types/lodash-es" "^4.17.12"
     case "^1.6.3"
     hotkeys-js "^3.10.2"
     linearly "^0.20.3"
-    lodash "^4.17.21"
+    lodash-es "^4.17.21"
 
 boolbase@^1.0.0:
   version "1.0.0"
@@ -4382,6 +4390,11 @@ locate-path@^6.0.0:
   integrity sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==
   dependencies:
     p-locate "^5.0.0"
+
+lodash-es@^4.17.21:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
+  integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
 
 lodash.debounce@^4.0.8:
   version "4.0.8"

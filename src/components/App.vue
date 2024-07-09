@@ -1,6 +1,12 @@
 <script lang="ts" setup>
 import {initTweeq, useTweeq} from 'tweeq'
 
+import {useAppActions} from '@/appActions'
+import {useSettings} from '@/settings'
+
+import PaneItems from './PaneItems.vue'
+import PaneSearch from './PaneSearch.vue'
+import PaneViewport from './PaneViewport.vue'
 import TitleBar from './TitleBar.vue'
 
 initTweeq('com.baku89.unim', {
@@ -11,6 +17,9 @@ initTweeq('com.baku89.unim', {
 })
 
 const Tq = useTweeq()
+
+useSettings()
+useAppActions()
 </script>
 
 <template>
@@ -19,26 +28,27 @@ const Tq = useTweeq()
 		<Tq.PaneModalComplex />
 		<TitleBar />
 		<main class="main">
-			<Tq.PaneSplit name="vertical" direction="vertical">
+			<Tq.PaneSplit
+				name="vertical"
+				direction="vertical"
+				:scroll="[false, false]"
+			>
 				<template #first>
 					<Tq.PaneSplit
 						name="preview"
 						direction="horizontal"
 						:scroll="[false, false]"
 					>
-						<template #first> Viewport </template>
-						<template #second> Search </template>
+						<template #first>
+							<PaneViewport />
+						</template>
+						<template #second>
+							<PaneSearch />
+						</template>
 					</Tq.PaneSplit>
 				</template>
 				<template #second>
-					<Tq.PaneSplit
-						name="control"
-						direction="vertical"
-						:scroll="[false, false]"
-					>
-						<template #first> Timeline </template>
-						<template #second> Node </template>
-					</Tq.PaneSplit>
+					<PaneItems />
 				</template>
 			</Tq.PaneSplit>
 		</main>

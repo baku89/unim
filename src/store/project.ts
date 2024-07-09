@@ -1,12 +1,16 @@
 import {mat2d, vec2} from 'linearly'
+import {defineStore} from 'pinia'
+import {reactive, toRefs, watchEffect} from 'vue'
 
-interface Glyph {
-	path: Path2D
+export interface Glyph {
+	path: string
 	transform: mat2d
 	/** 元のグリフから編集されているか */
 	modified: boolean
 	/** コードポイント */
 	code: number | number[]
+	/** インデックス */
+	index: number
 	/** Unicodeの名前 */
 	name: string
 	fontName: string
@@ -14,11 +18,6 @@ interface Glyph {
 	/** 追加のアトリビュート、偏の位置とか */
 	meta: Record<string, number | vec2 | string | boolean>
 }
-
-/**
- * グリフのユーザー編集可能なメタデータ
- */
-interface GlyphMeta {}
 
 interface TimelineGlyphClip {
 	glyph: Glyph
@@ -35,7 +34,7 @@ interface TimelineLayer {
 	visible: boolean
 }
 
-interface Timeline {
+export interface Timeline {
 	/** フレーム順に並んでいる */
 	clips: TimelineGlyphClip[]
 	frameRate: number
@@ -53,10 +52,11 @@ interface Timeline {
  */
 interface BaseItem {
 	color: string
+	id: string
 	position: vec2
 }
 
-interface ItemComment extends BaseItem {
+export interface ItemComment extends BaseItem {
 	type: 'comment'
 	content: string
 }
@@ -64,16 +64,38 @@ interface ItemComment extends BaseItem {
 /**
  * アイテムビュー上のグリフの連なり
  */
-interface ItemGlyphSequence extends BaseItem {
+export interface ItemGlyphSequence extends BaseItem {
 	type: 'glyphSequence'
 	glyphs: Glyph[]
 }
-type Item = ItemComment | ItemGlyphSequence
+
+export type Item = ItemComment | ItemGlyphSequence
 
 type SemVer = `${number}.${number}.${number}`
 
-interface UnimProject {
+export interface UnimProject {
 	version: SemVer
+	frameRate: 24
 	items: Item[]
-	timeline: Timeline
 }
+
+export const useProjectStore = defineStore('project', () => {
+	const project = reactive<UnimProject>({
+		version: '0.0.1',
+		frameRate: 24,
+		items: [],
+	})
+
+	const savedProject = localStorage.getItem('project')
+	if (savedProject) {
+		Object.assign(project, JSON.parse(savedProject))
+	}
+
+	watchEffect(() => {
+		localStorage.setItem('project', JSON.stringify(project))
+	})
+
+	return {
+		...toRefs(project),
+	}
+})
