@@ -174,7 +174,7 @@ export const useAppStateStore = defineStore('appState', () => {
 			},
 		},
 		{
-			id: 'delete_selected',
+			id: 'deleted',
 			bind: 'backspace',
 			perform() {
 				let nextSelection: Selection[] = []
@@ -185,7 +185,7 @@ export const useAppStateStore = defineStore('appState', () => {
 						const {index, charIndex} = sel
 						const item = project.items[index]
 
-						if (item.type === 'glyphSequence') {
+						if (item.type === 'glyphSequence' && item.glyphs.length > 1) {
 							const nextCharIndex = Math.min(charIndex, item.glyphs.length - 2)
 							nextSelection = [
 								{
@@ -217,6 +217,10 @@ export const useAppStateStore = defineStore('appState', () => {
 						const item = project.items[selection.index]
 						if (item.type === 'glyphSequence') {
 							item.glyphs.splice(selection.charIndex, 1)
+							if (item.glyphs.length === 0) {
+								project.items.splice(selection.index, 1)
+								selections.value = []
+							}
 						}
 					}
 				}
