@@ -70,8 +70,6 @@ export const useAppStateStore = defineStore('appState', () => {
 			return
 		}
 
-		const fps = project.frameRate
-
 		const {index} = selection
 		let {charIndex} = selection
 
@@ -98,10 +96,13 @@ export const useAppStateStore = defineStore('appState', () => {
 				},
 			]
 
-			setTimeout(update, (1000 / fps) * glyphs[charIndex].duration)
+			setTimeout(
+				update,
+				(1000 / project.frameRate) * glyphs[charIndex].duration
+			)
 		}
 
-		setTimeout(update, (1000 / fps) * glyphs[charIndex].duration)
+		setTimeout(update, (1000 / project.frameRate) * glyphs[charIndex].duration)
 	})
 
 	function offsetSelection(offset: number) {
@@ -147,8 +148,6 @@ export const useAppStateStore = defineStore('appState', () => {
 		if (item.type === 'glyphSequence') {
 			const nextIndex =
 				(charIndex + offset + item.glyphs.length) % item.glyphs.length
-
-			console.log('swap', charIndex, nextIndex)
 
 			const [a, b] = [item.glyphs[charIndex], item.glyphs[nextIndex]]
 
