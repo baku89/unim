@@ -41,6 +41,13 @@ export const useViewportStore = defineStore('viewport', () => {
 			}
 		}
 
+		if (appState.searchHoveredGlyph) {
+			shapes.push({
+				style: {fill: 'rgba(255, 0, 0, .5)'},
+				path: appState.searchHoveredGlyph.path,
+			})
+		}
+
 		return shapes
 	})
 

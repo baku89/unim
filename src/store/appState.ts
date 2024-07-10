@@ -1,13 +1,14 @@
 import {whenever} from '@vueuse/core'
+import {mat2d, vec2} from 'linearly'
 import {uniqueId} from 'lodash'
 import {defineStore} from 'pinia'
 import {useTweeq} from 'tweeq'
-import {ref} from 'vue'
+import {computed, ref} from 'vue'
 
-import {parseAEKeyframe} from '@/AEKeyframes'
-import {GlyphInfo, infoToGlyph} from '@/store/api'
+import {encodeAEKeyframe, parseAEKeyframe} from '@/AEKeyframes'
+import {GlyphInfo, toGlyph, useAPIStore} from '@/store/api'
 
-import {useProjectStore} from './project'
+import {Glyph, useProjectStore} from './project'
 
 type Selection =
 	| {
@@ -23,8 +24,33 @@ type Selection =
 
 export const useAppStateStore = defineStore('appState', () => {
 	const project = useProjectStore()
+	const api = useAPIStore()
 
 	const selections = ref<Selection[]>([])
+
+	const selectedGlyphs = computed<Glyph[]>(() => {
+		return selections.value.flatMap(sel => {
+			if (sel.type === 'item') {
+				const item = project.items[sel.index]
+				if (item.type === 'glyphSequence') {
+					return item.glyphs
+				}
+			} else if (sel.type === 'sequenceChar') {
+				const item = project.items[sel.index]
+				if (item.type === 'glyphSequence' && !sel.gap) {
+					return [item.glyphs[sel.charIndex]]
+				}
+			}
+			return []
+		})
+	})
+
+	const copiedGlyphs = ref<{
+		aeKeyframeData: string
+		glyphs: Glyph[]
+	} | null>(null)
+
+	const searchHoveredGlyph = ref<GlyphInfo | null>(null)
 
 	const Tq = useTweeq()
 
@@ -110,6 +136,35 @@ export const useAppStateStore = defineStore('appState', () => {
 		}
 	}
 
+	function swapSelectedGlyph(offset: number) {
+		const sel = selections.value[0]
+		if (sel?.type !== 'sequenceChar') {
+			return
+		}
+
+		const {index, charIndex} = sel
+		const item = project.items[index]
+		if (item.type === 'glyphSequence') {
+			const nextIndex =
+				(charIndex + offset + item.glyphs.length) % item.glyphs.length
+
+			console.log('swap', charIndex, nextIndex)
+
+			const [a, b] = [item.glyphs[charIndex], item.glyphs[nextIndex]]
+
+			item.glyphs[charIndex] = b
+			item.glyphs[nextIndex] = a
+			selections.value = [
+				{
+					type: 'sequenceChar',
+					index,
+					charIndex: nextIndex,
+					gap: false,
+				},
+			]
+		}
+	}
+
 	Tq.actions.register([
 		{
 			id: 'deselect',
@@ -189,16 +244,180 @@ export const useAppStateStore = defineStore('appState', () => {
 		},
 		{
 			id: 'next_frame',
-			bind: ['command+right', 'f'],
+			bind: ['right', 'f'],
 			perform() {
 				offsetSelection(1)
 			},
 		},
 		{
 			id: 'prev_frame',
-			bind: ['command+left', 'd'],
+			bind: ['left', 'd'],
 			perform() {
 				offsetSelection(-1)
+			},
+		},
+		{
+			id: 'swap_selected_foward',
+			bind: 'command+f',
+			perform() {
+				swapSelectedGlyph(1)
+			},
+		},
+		{
+			id: 'swap_selected_backward',
+			bind: 'command+d',
+			perform() {
+				swapSelectedGlyph(-1)
+			},
+		},
+		{
+			id: 'copy',
+			bind: 'command+c',
+			perform: async () => {
+				const keyframes = selectedGlyphs.value.map((g, frame) => ({
+					frame,
+					values: [g.index / 24],
+				}))
+
+				const aeKeyframeData = encodeAEKeyframe({
+					frameRate: project.frameRate,
+					compSize: [1000, 1000],
+					sourcePixelAspectRatio: 1,
+					compPixelAspectRatio: 1,
+					layers: [
+						{
+							name: 'Layer',
+							properties: [
+								{
+									type: 'Time Remap',
+									name: '',
+									keyframes,
+								},
+							],
+						},
+					],
+				})
+
+				await navigator.clipboard.writeText(aeKeyframeData)
+
+				// deep clone the selected glyphs
+				const glyphs = JSON.parse(JSON.stringify(selectedGlyphs.value))
+
+				copiedGlyphs.value = {
+					aeKeyframeData,
+					glyphs,
+				}
+			},
+		},
+		{
+			id: 'paste',
+			bind: 'command+v',
+			perform: async () => {
+				const clipboard = await navigator.clipboard.readText()
+
+				if (copiedGlyphs.value) {
+					if (clipboard === copiedGlyphs.value.aeKeyframeData) {
+						insertGlyphs(copiedGlyphs.value.glyphs)
+					}
+				} else if (clipboard.startsWith('Adobe After Effects')) {
+					const aeKeyframeData = parseAEKeyframe(clipboard)
+
+					const layer = aeKeyframeData.layers[0]
+
+					const keyframes = layer.properties.flatMap(p => p.keyframes)
+					const minFrame = Math.min(...keyframes.map(k => k.frame))
+					const maxFrame = Math.max(...keyframes.map(k => k.frame))
+
+					const frames = Array(maxFrame - minFrame + 1)
+						.fill(null)
+						.map(
+							() =>
+								({
+									index: null,
+									position: null,
+									scale: null,
+								}) as {
+									index: number | null
+									position: vec2 | null
+									scale: number | null
+								}
+						)
+
+					for (const prop of layer.properties) {
+						if (prop.type === 'Time Remap') {
+							for (const keyframe of prop.keyframes) {
+								const frame = frames[keyframe.frame - minFrame]
+								frame.index = Math.round(keyframe.values[0] * 24)
+							}
+						}
+					}
+
+					let index = 0,
+						position: vec2 = [0, 0],
+						scale = 1
+
+					for (let f = 0; f < frames.length; f++) {
+						const frame = frames[f] ?? {
+							index: null,
+							position: null,
+							scale: null,
+						}
+
+						if (frame.index === null) {
+							frame.index = index
+						}
+						if (frame.position === null) {
+							frame.position = position
+						}
+						if (frame.scale === null) {
+							frame.scale = scale
+						}
+
+						index = frame.index
+						position = frame.position
+						scale = frame.scale
+					}
+
+					const glyphs: Glyph[] = []
+					let lastFrame = 0
+
+					for (let f = 0; f <= frames.length; f++) {
+						const frame = frames[f] ?? {
+							index: null,
+							position: null,
+							scale: null,
+						}
+						const prevFrame = frames[Math.max(0, f - 1)]
+
+						if (
+							frame.index !== prevFrame.index ||
+							!frame.position ||
+							!prevFrame.position ||
+							!vec2.eq(frame.position, prevFrame.position) ||
+							frame.scale !== prevFrame.scale
+						) {
+							const duration = f - lastFrame
+							const transform = mat2d.fromTRS(position, 0, scale)
+							const info = await api.lookup({index: prevFrame.index!})
+
+							if (info.status !== 'success') {
+								throw new Error('Failed to lookup glyph')
+							}
+
+							const glyph = toGlyph({
+								...info.result,
+								transform,
+								duration,
+							})
+
+							glyphs.push(glyph)
+
+							lastFrame = f
+						}
+					}
+
+					insertGlyphs(glyphs)
+				}
 			},
 		},
 		{
@@ -230,15 +449,13 @@ export const useAppStateStore = defineStore('appState', () => {
 				)?.keyframes
 
 				if (!timeRemap) return
-
-				console.log('paste keyframes=', timeRemap)
 			},
 		},
 	])
 
 	// Actions
-	function insertGlyphInfos(glyphInfos: GlyphInfo[]) {
-		const glyphs = glyphInfos.map(infoToGlyph)
+	function insertGlyphs(glyphInfos: (Glyph | GlyphInfo)[]) {
+		const glyphs = glyphInfos.map(toGlyph)
 
 		const firstSel = selections.value[0]
 
@@ -278,6 +495,7 @@ export const useAppStateStore = defineStore('appState', () => {
 	return {
 		selections,
 		isPlaying,
-		insertGlyphInfos,
+		insertGlyphInfos: insertGlyphs,
+		searchHoveredGlyph,
 	}
 })

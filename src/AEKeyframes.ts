@@ -1,6 +1,6 @@
 import {vec2} from 'linearly'
 
-type AEKeyframeData = {
+export type AEKeyframeData = {
 	frameRate: number
 	compSize: vec2
 	sourcePixelAspectRatio: number
@@ -96,7 +96,7 @@ export function parseAEKeyframe(text: string): AEKeyframeData {
 			if (currentLayer) {
 				keyframeData.layers.push(currentLayer)
 			}
-			break
+			return keyframeData
 		} else {
 			const [type, name] = line.split('\t')
 			const keyframes: AEKeyframe[] = []
@@ -118,5 +118,41 @@ export function parseAEKeyframe(text: string): AEKeyframeData {
 		}
 	}
 
-	return keyframeData
+	throw new Error('Unexpected end of file')
+}
+
+export function encodeAEKeyframe(data: AEKeyframeData): string {
+	const lines = [
+		'Adobe After Effects 9.0 Keyframe Data',
+		'',
+		`\tUnits Per Second\t${data.frameRate}`,
+		`\tSource Width\t${data.compSize[0] ?? 1000}`,
+		`\tSource Height\t${data.compSize[1] ?? 1000}`,
+		`\tSource Pixel Aspect Ratio\t${data.sourcePixelAspectRatio ?? 1}`,
+		`\tComp Pixel Aspect Ratio\t${data.compPixelAspectRatio ?? 1}`,
+		'',
+	]
+
+	for (const layer of data.layers) {
+		lines.push('Layer')
+
+		for (const prop of layer.properties) {
+			lines.push([prop.type, prop.name].filter(s => s).join('\t'))
+
+			if (prop.type === 'Time Remap') {
+				lines.push('\tFrame\tseconds\t')
+			}
+
+			for (const keyframe of prop.keyframes) {
+				lines.push(`\t${keyframe.frame}\t${keyframe.values.join('\t')}\t`)
+			}
+
+			lines.push('')
+		}
+	}
+
+	lines.push('End of Keyframe Data')
+	lines.push('')
+
+	return lines.join('\n')
 }

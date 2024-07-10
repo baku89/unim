@@ -27,13 +27,17 @@ useBndr($root, root => {
 				appState.selections = []
 			}
 		} else if (dd.type === 'drag') {
+			const [sx, , , sy] = transform.value
+
+			const delta = vec2.mul(dd.delta, [1 / sx, 1 / sy])
+
 			for (const selection of appState.selections) {
 				if (selection.type !== 'item') continue
 
 				const item = project.items[selection.index]
 				if (item === undefined) continue
 
-				item.position = vec2.add(item.position, dd.delta)
+				item.position = vec2.add(item.position, delta)
 			}
 		}
 	})

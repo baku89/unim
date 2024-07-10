@@ -35,19 +35,25 @@ interface GlyphInfoSimilarity extends GlyphInfo {
 	dist: number
 }
 
-export function infoToGlyph(info: GlyphInfo): Glyph {
+export function toGlyph(
+	info: (GlyphInfo | Glyph) & {transform?: mat2d; duration?: number}
+): Glyph {
 	info = toRaw(info)
 
-	return {
-		path: info.path,
-		transform: mat2d.I,
-		modified: false,
-		code: info.code_num,
-		index: info.index,
-		name: info.name,
-		fontName: info.font,
-		duration: 1,
-		meta: {},
+	if ('code_num' in info) {
+		return {
+			path: info.path,
+			transform: info.transform ?? mat2d.I,
+			modified: false,
+			code: info.code_num,
+			index: info.index,
+			name: info.name,
+			font: info.font,
+			duration: info.duration ?? 1,
+			meta: {},
+		}
+	} else {
+		return info
 	}
 }
 
@@ -56,7 +62,6 @@ export const useAPIStore = defineStore('api', () => {
 
 	const searchWord = ref('')
 	const searchBy = ref<'char' | 'code' | 'index'>('char')
-	const filterBy = ref<'code' | 'similarity'>('code')
 
 	const restURL = computed(() => {
 		if (!searchWord.value) {
@@ -85,5 +90,18 @@ export const useAPIStore = defineStore('api', () => {
 		searchBy.value = 'index'
 	}
 
-	return {isFetching, result, searchBy, filterBy, searchWord, searchByGlyph}
+	async function lookup(query: {char: string} | {index: number}) {
+		let strQuery: Record<string, string> = {}
+		if ('index' in query) {
+			strQuery = {index: query.index.toString()}
+		} else {
+			strQuery = query
+		}
+
+		const url = `${settings.apiURL.value}/lookup?${new URLSearchParams(strQuery)}`
+		const res = await fetch(url)
+		return res.json() as Promise<APIResponse<GlyphInfo>>
+	}
+
+	return {isFetching, result, searchBy, searchWord, searchByGlyph, lookup}
 })

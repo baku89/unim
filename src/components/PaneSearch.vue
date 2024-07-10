@@ -48,6 +48,8 @@ const glyphs = computed(() => {
 				v-bind="glyph"
 				@click.left="appState.insertGlyphInfos([glyph])"
 				@click.right.prevent="api.searchByGlyph(glyph)"
+				@mouseenter="appState.searchHoveredGlyph = glyph"
+				@mouseleave="appState.searchHoveredGlyph = null"
 			/>
 		</div>
 	</div>
