@@ -54,7 +54,7 @@ const transform = computed<mat2d>(() => {
 				<path
 					v-for="(shape, index) in viewport.shapes"
 					:d="shape.path"
-					v-bind="shape.style"
+					v-bind="{fill: 'none', ...shape.style}"
 					:key="index"
 				/>
 			</svg>

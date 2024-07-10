@@ -46,7 +46,7 @@ export const useViewportStore = defineStore('viewport', () => {
 							const opacity = (1 - i / onionskinCount.value[0]) ** 1.2
 
 							shapes.push({
-								style: {stroke: `rgba(0, 0, 255, ${opacity})`, fill: 'none'},
+								style: {stroke: `rgba(0, 0, 255, ${opacity})`},
 								path: item.glyphs[index].path,
 							})
 						}
@@ -55,7 +55,7 @@ export const useViewportStore = defineStore('viewport', () => {
 							const opacity = (1 - i / onionskinCount.value[1]) ** 1.2
 
 							shapes.push({
-								style: {stroke: `rgba(255, 0, 0, ${opacity})`, fill: 'none'},
+								style: {stroke: `rgba(255, 0, 0, ${opacity})`},
 								path: item.glyphs[index].path,
 							})
 						}
