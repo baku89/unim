@@ -317,6 +317,15 @@ export const useAppStateStore = defineStore('appState', () => {
 					},
 				},
 				{
+					id: 'cut',
+					bind: 'command+x',
+					icon: 'ic:baseline-content-cut',
+					perform: async () => {
+						await Tq.actions.perform('copy')
+						await Tq.actions.perform('delete')
+					},
+				},
+				{
 					id: 'paste',
 					bind: 'command+v',
 					icon: 'ic:baseline-content-paste',
