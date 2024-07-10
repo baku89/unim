@@ -67,8 +67,8 @@ const transform = computed<mat2d>(() => {
 	height 100%
 	background #eee
 
-
 .viewport
 	background white
 	width 1000px
+	fill none
 </style>

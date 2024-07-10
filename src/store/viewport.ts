@@ -1,7 +1,7 @@
-import {mat2d} from 'linearly'
+import {mat2d, scalar} from 'linearly'
 import {defineStore} from 'pinia'
 import {useTweeq} from 'tweeq'
-import {computed, shallowRef} from 'vue'
+import {computed, ref, shallowRef} from 'vue'
 
 import {useAppStateStore} from './appState'
 import {useProjectStore} from './project'
@@ -23,6 +23,8 @@ export const useViewportStore = defineStore('viewport', () => {
 
 	const transform = shallowRef<mat2d | 'fit'>('fit')
 
+	const onionskinCount = ref<[prevCount: number, nextCount: number]>([0, 2])
+
 	const selectedShapes = computed<Shape[]>(() => {
 		const shapes: Shape[] = []
 
@@ -37,16 +39,37 @@ export const useViewportStore = defineStore('viewport', () => {
 						style: {fill: 'black'},
 						path: item.glyphs[charIndex].path,
 					})
+
+					if (!appState.isPlaying) {
+						for (let i = 0; i < onionskinCount.value[0]; i++) {
+							const index = scalar.mod(charIndex - i - 1, item.glyphs.length)
+							const opacity = (1 - i / onionskinCount.value[0]) ** 1.2
+
+							shapes.push({
+								style: {stroke: `rgba(0, 0, 255, ${opacity})`, fill: 'none'},
+								path: item.glyphs[index].path,
+							})
+						}
+						for (let i = 0; i < onionskinCount.value[1]; i++) {
+							const index = scalar.mod(charIndex + i + 1, item.glyphs.length)
+							const opacity = (1 - i / onionskinCount.value[1]) ** 1.2
+
+							shapes.push({
+								style: {stroke: `rgba(255, 0, 0, ${opacity})`, fill: 'none'},
+								path: item.glyphs[index].path,
+							})
+						}
+					}
 				}
 			}
 		}
 
-		if (appState.searchHoveredGlyph) {
-			shapes.push({
-				style: {fill: 'rgba(255, 0, 0, .5)'},
-				path: appState.searchHoveredGlyph.path,
-			})
-		}
+		shapes.push(
+			...appState.hoveredGlyphs.map(glyph => ({
+				style: {fill: 'rgba(0, 255, 0, .5)'},
+				path: glyph.path,
+			}))
+		)
 
 		return shapes
 	})
@@ -74,5 +97,6 @@ export const useViewportStore = defineStore('viewport', () => {
 	return {
 		transform,
 		shapes,
+		onionskinCount,
 	}
 })

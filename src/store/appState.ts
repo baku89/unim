@@ -1,5 +1,5 @@
 import {whenever} from '@vueuse/core'
-import {mat2d, vec2} from 'linearly'
+import {mat2d, scalar, vec2} from 'linearly'
 import {uniqueId} from 'lodash'
 import {defineStore} from 'pinia'
 import {useTweeq} from 'tweeq'
@@ -53,7 +53,7 @@ export const useAppStateStore = defineStore('appState', () => {
 		glyphs: Glyph[]
 	} | null>(null)
 
-	const searchHoveredGlyph = ref<GlyphInfo | null>(null)
+	const hoveredGlyphs = ref<(GlyphInfo | Glyph)[]>([])
 
 	const isPlaying = ref(false)
 
@@ -111,9 +111,10 @@ export const useAppStateStore = defineStore('appState', () => {
 			if (selection.type === 'sequenceChar') {
 				const item = project.items[selection.index]
 				if (item.type === 'glyphSequence') {
-					selection.charIndex =
-						(selection.charIndex + offset + item.glyphs.length) %
+					selection.charIndex = scalar.mod(
+						selection.charIndex + offset,
 						item.glyphs.length
+					)
 				}
 			}
 		}
@@ -147,8 +148,7 @@ export const useAppStateStore = defineStore('appState', () => {
 		const {index, charIndex} = sel
 		const item = project.items[index]
 		if (item.type === 'glyphSequence') {
-			const nextIndex =
-				(charIndex + offset + item.glyphs.length) % item.glyphs.length
+			const nextIndex = scalar.mod(charIndex + offset, item.glyphs.length)
 
 			const [a, b] = [item.glyphs[charIndex], item.glyphs[nextIndex]]
 
@@ -517,6 +517,6 @@ export const useAppStateStore = defineStore('appState', () => {
 		isPlaying,
 		insertGlyphs,
 		itemInsertPosition,
-		searchHoveredGlyph,
+		hoveredGlyphs,
 	}
 })

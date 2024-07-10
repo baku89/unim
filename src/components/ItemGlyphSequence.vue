@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import {scalar} from 'linearly'
 import {computed} from 'vue'
 
 import {useAPIStore} from '@/store/api'
@@ -13,7 +14,7 @@ const props = defineProps<
 	}
 >()
 
-defineEmits<{
+const emit = defineEmits<{
 	select: [char: false | {charIndex: number; gap: boolean}]
 }>()
 
@@ -52,6 +53,10 @@ const styles = computed(() => {
 		transform: `translate(${props.position.map(v => v + 'px').join(',')})`,
 	}
 })
+
+function onSelect(charIndex: number) {
+	emit('select', {charIndex, gap: false})
+}
 </script>
 
 <template>
@@ -67,13 +72,22 @@ const styles = computed(() => {
 					class="gap"
 					:class="{selected: charSelections.gaps.has(charIndex)}"
 					@pointerdown="$emit('select', {charIndex, gap: true})"
+					@mouseenter="
+						appState.hoveredGlyphs = [
+							glyphs[scalar.mod(charIndex - 1, glyphs.length)],
+							glyph,
+						]
+					"
+					@mouseleave="appState.hoveredGlyphs = []"
 				/>
 				<div
 					class="glyph"
 					:class="{selected: charSelections.chars.has(charIndex)}"
 					:style="{aspectRatio: glyph.duration}"
-					@pointerdown="$emit('select', {charIndex, gap: false})"
 					@click.right.prevent="api.searchByGlyph(glyph)"
+					@mouseenter="appState.hoveredGlyphs = [glyph]"
+					@mouseleave="appState.hoveredGlyphs = []"
+					@pointerdown="onSelect(charIndex)"
 				>
 					<GlyphThumb class="thumb" :path="glyph.path" :scale="2.5" />
 				</div>
