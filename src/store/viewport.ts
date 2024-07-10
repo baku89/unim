@@ -57,11 +57,17 @@ export const useViewportStore = defineStore('viewport', () => {
 
 	Tq.actions.register([
 		{
-			id: 'fit_viewport',
-			bind: 'h',
-			perform() {
-				transform.value = 'fit'
-			},
+			id: 'viewport',
+			icon: 'material-symbols:preview',
+			children: [
+				{
+					id: 'fit_viewport',
+					bind: 'h',
+					perform() {
+						transform.value = 'fit'
+					},
+				},
+			],
 		},
 	])
 

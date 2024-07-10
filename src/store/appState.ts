@@ -173,7 +173,7 @@ export const useAppStateStore = defineStore('appState', () => {
 			},
 		},
 		{
-			id: 'deleted',
+			id: 'delete',
 			bind: 'backspace',
 			perform() {
 				let nextSelection: Selection[] = []
@@ -274,154 +274,161 @@ export const useAppStateStore = defineStore('appState', () => {
 			},
 		},
 		{
-			id: 'copy',
-			bind: 'command+c',
-			perform: async () => {
-				const keyframes = selectedGlyphs.value.map((g, frame) => ({
-					frame,
-					values: [g.index / 24],
-				}))
+			id: 'edit',
+			children: [
+				{
+					id: 'copy',
+					bind: 'command+c',
+					icon: 'ic:baseline-copy-all',
+					perform: async () => {
+						const keyframes = selectedGlyphs.value.map((g, frame) => ({
+							frame,
+							values: [g.index / 24],
+						}))
 
-				const aeKeyframeData = encodeAEKeyframe({
-					frameRate: project.frameRate,
-					compSize: [1000, 1000],
-					sourcePixelAspectRatio: 1,
-					compPixelAspectRatio: 1,
-					layers: [
-						{
-							name: 'Layer',
-							properties: [
+						const aeKeyframeData = encodeAEKeyframe({
+							frameRate: project.frameRate,
+							compSize: [1000, 1000],
+							sourcePixelAspectRatio: 1,
+							compPixelAspectRatio: 1,
+							layers: [
 								{
-									type: 'Time Remap',
-									name: '',
-									keyframes,
+									name: 'Layer',
+									properties: [
+										{
+											type: 'Time Remap',
+											name: '',
+											keyframes,
+										},
+									],
 								},
 							],
-						},
-					],
-				})
+						})
 
-				await navigator.clipboard.writeText(aeKeyframeData)
+						await navigator.clipboard.writeText(aeKeyframeData)
 
-				// deep clone the selected glyphs
-				const glyphs = JSON.parse(JSON.stringify(selectedGlyphs.value))
+						// deep clone the selected glyphs
+						const glyphs = JSON.parse(JSON.stringify(selectedGlyphs.value))
 
-				copiedGlyphs.value = {
-					aeKeyframeData,
-					glyphs,
-				}
-			},
-		},
-		{
-			id: 'paste',
-			bind: 'command+v',
-			perform: async () => {
-				const clipboard = await navigator.clipboard.readText()
+						copiedGlyphs.value = {
+							aeKeyframeData,
+							glyphs,
+						}
+					},
+				},
+				{
+					id: 'paste',
+					bind: 'command+v',
+					icon: 'ic:baseline-content-paste',
+					perform: async () => {
+						const clipboard = await navigator.clipboard.readText()
 
-				if (copiedGlyphs.value) {
-					if (clipboard === copiedGlyphs.value.aeKeyframeData) {
-						insertGlyphs(copiedGlyphs.value.glyphs)
-					}
-				} else if (clipboard.startsWith('Adobe After Effects')) {
-					const aeKeyframeData = parseAEKeyframe(clipboard)
+						if (copiedGlyphs.value) {
+							if (clipboard === copiedGlyphs.value.aeKeyframeData) {
+								insertGlyphs(copiedGlyphs.value.glyphs)
+							}
+						} else if (clipboard.startsWith('Adobe After Effects')) {
+							const aeKeyframeData = parseAEKeyframe(clipboard)
 
-					const layer = aeKeyframeData.layers[0]
+							const layer = aeKeyframeData.layers[0]
 
-					const keyframes = layer.properties.flatMap(p => p.keyframes)
-					const minFrame = Math.min(...keyframes.map(k => k.frame))
-					const maxFrame = Math.max(...keyframes.map(k => k.frame))
+							const keyframes = layer.properties.flatMap(p => p.keyframes)
+							const minFrame = Math.min(...keyframes.map(k => k.frame))
+							const maxFrame = Math.max(...keyframes.map(k => k.frame))
 
-					const frames = Array(maxFrame - minFrame + 1)
-						.fill(null)
-						.map(
-							() =>
-								({
+							const frames = Array(maxFrame - minFrame + 1)
+								.fill(null)
+								.map(
+									() =>
+										({
+											index: null,
+											position: null,
+											scale: null,
+										}) as {
+											index: number | null
+											position: vec2 | null
+											scale: number | null
+										}
+								)
+
+							for (const prop of layer.properties) {
+								if (prop.type === 'Time Remap') {
+									for (const keyframe of prop.keyframes) {
+										const frame = frames[keyframe.frame - minFrame]
+										frame.index = Math.round(keyframe.values[0] * 24)
+									}
+								}
+							}
+
+							let index = 0,
+								position: vec2 = [0, 0],
+								scale = 1
+
+							for (let f = 0; f < frames.length; f++) {
+								const frame = frames[f] ?? {
 									index: null,
 									position: null,
 									scale: null,
-								}) as {
-									index: number | null
-									position: vec2 | null
-									scale: number | null
 								}
-						)
 
-					for (const prop of layer.properties) {
-						if (prop.type === 'Time Remap') {
-							for (const keyframe of prop.keyframes) {
-								const frame = frames[keyframe.frame - minFrame]
-								frame.index = Math.round(keyframe.values[0] * 24)
-							}
-						}
-					}
+								if (frame.index === null) {
+									frame.index = index
+								}
+								if (frame.position === null) {
+									frame.position = position
+								}
+								if (frame.scale === null) {
+									frame.scale = scale
+								}
 
-					let index = 0,
-						position: vec2 = [0, 0],
-						scale = 1
-
-					for (let f = 0; f < frames.length; f++) {
-						const frame = frames[f] ?? {
-							index: null,
-							position: null,
-							scale: null,
-						}
-
-						if (frame.index === null) {
-							frame.index = index
-						}
-						if (frame.position === null) {
-							frame.position = position
-						}
-						if (frame.scale === null) {
-							frame.scale = scale
-						}
-
-						index = frame.index
-						position = frame.position
-						scale = frame.scale
-					}
-
-					const glyphs: Glyph[] = []
-					let lastFrame = 0
-
-					for (let f = 0; f <= frames.length; f++) {
-						const frame = frames[f] ?? {
-							index: null,
-							position: null,
-							scale: null,
-						}
-						const prevFrame = frames[Math.max(0, f - 1)]
-
-						if (
-							frame.index !== prevFrame.index ||
-							!frame.position ||
-							!prevFrame.position ||
-							!vec2.eq(frame.position, prevFrame.position) ||
-							frame.scale !== prevFrame.scale
-						) {
-							const duration = f - lastFrame
-							const transform = mat2d.fromTRS(position, 0, scale)
-							const info = await api.lookup({index: prevFrame.index!})
-
-							if (info.status !== 'success') {
-								throw new Error('Failed to lookup glyph')
+								index = frame.index
+								position = frame.position
+								scale = frame.scale
 							}
 
-							const glyph = toGlyph({
-								...info.result,
-								transform,
-								duration,
-							})
+							const glyphs: Glyph[] = []
+							let lastFrame = 0
 
-							glyphs.push(glyph)
+							for (let f = 0; f <= frames.length; f++) {
+								const frame = frames[f] ?? {
+									index: null,
+									position: null,
+									scale: null,
+								}
+								const prevFrame = frames[Math.max(0, f - 1)]
 
-							lastFrame = f
+								if (
+									frame.index !== prevFrame.index ||
+									!frame.position ||
+									!prevFrame.position ||
+									!vec2.eq(frame.position, prevFrame.position) ||
+									frame.scale !== prevFrame.scale
+								) {
+									const duration = f - lastFrame
+									const transform = mat2d.fromTRS(position, 0, scale)
+									const info = await api.lookup({index: prevFrame.index!})
+
+									if (info.status !== 'success') {
+										throw new Error('Failed to lookup glyph')
+									}
+
+									const glyph = toGlyph({
+										...info.result,
+										transform,
+										duration,
+									})
+
+									glyphs.push(glyph)
+
+									lastFrame = f
+								}
+							}
+
+							insertGlyphs(glyphs)
 						}
-					}
-
-					insertGlyphs(glyphs)
-				}
-			},
+					},
+				},
+			],
 		},
 		{
 			id: 'increase_duration',
