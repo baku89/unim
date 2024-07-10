@@ -71,4 +71,8 @@ const transform = computed<mat2d>(() => {
 	background white
 	width 1000px
 	fill none
+
+	path
+		vector-effect non-scaling-stroke
+		stroke-width 1.5
 </style>

@@ -32,6 +32,11 @@ const viewport = useViewportStore()
 				/>
 			</div>
 			<div style="display: flex">
+				<Tq.InputIconToggle
+					v-model="viewport.showOnionskin"
+					icon="fluent-emoji-high-contrast:onion"
+					horizontalPosition="left"
+				/>
 				<Tq.InputNumber
 					v-model="viewport.onionskinCount[0]"
 					:precision="0"
@@ -40,7 +45,7 @@ const viewport = useViewportStore()
 					:step="1"
 					:bar="false"
 					style="width: 3em"
-					horizontalPosition="left"
+					horizontalPosition="middle"
 				/>
 				<Tq.InputNumber
 					v-model="viewport.onionskinCount[1]"

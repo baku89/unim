@@ -9,6 +9,7 @@ import {useProjectStore} from './project'
 interface Style {
 	stroke?: string
 	fill?: string
+	opacity?: number
 }
 
 interface Shape {
@@ -24,6 +25,7 @@ export const useViewportStore = defineStore('viewport', () => {
 	const transform = shallowRef<mat2d | 'fit'>('fit')
 
 	const onionskinCount = ref<[prevCount: number, nextCount: number]>([0, 2])
+	const showOnionskin = ref(false)
 
 	const selectedShapes = computed<Shape[]>(() => {
 		const shapes: Shape[] = []
@@ -40,13 +42,15 @@ export const useViewportStore = defineStore('viewport', () => {
 						path: item.glyphs[charIndex].path,
 					})
 
-					if (!appState.isPlaying) {
+					if (!appState.isPlaying && showOnionskin.value) {
 						for (let i = 0; i < onionskinCount.value[0]; i++) {
 							const index = scalar.mod(charIndex - i - 1, item.glyphs.length)
 							const opacity = (1 - i / onionskinCount.value[0]) ** 1.2
 
 							shapes.push({
-								style: {stroke: `rgba(0, 0, 255, ${opacity})`},
+								style: {
+									stroke: `rgba(0, 0, 255, ${opacity})`,
+								},
 								path: item.glyphs[index].path,
 							})
 						}
@@ -55,7 +59,9 @@ export const useViewportStore = defineStore('viewport', () => {
 							const opacity = (1 - i / onionskinCount.value[1]) ** 1.2
 
 							shapes.push({
-								style: {stroke: `rgba(255, 0, 0, ${opacity})`},
+								style: {
+									stroke: `rgba(255, 0, 0, ${opacity})`,
+								},
 								path: item.glyphs[index].path,
 							})
 						}
@@ -66,7 +72,7 @@ export const useViewportStore = defineStore('viewport', () => {
 
 		shapes.push(
 			...appState.hoveredGlyphs.map(glyph => ({
-				style: {fill: 'rgba(0, 255, 0, .5)'},
+				style: {fill: 'var(--tq-color-accent)', opacity: 0.2},
 				path: glyph.path,
 			}))
 		)
@@ -98,5 +104,6 @@ export const useViewportStore = defineStore('viewport', () => {
 		transform,
 		shapes,
 		onionskinCount,
+		showOnionskin,
 	}
 })
