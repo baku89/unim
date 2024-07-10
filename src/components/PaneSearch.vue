@@ -46,7 +46,7 @@ const glyphs = computed(() => {
 				v-for="glyph in glyphs"
 				:key="glyph.code_str"
 				v-bind="glyph"
-				@click.left="appState.insertGlyphInfos([glyph])"
+				@click.left="appState.insertGlyphs([glyph])"
 				@click.right.prevent="api.searchByGlyph(glyph)"
 				@mouseenter="appState.searchHoveredGlyph = glyph"
 				@mouseleave="appState.searchHoveredGlyph = null"

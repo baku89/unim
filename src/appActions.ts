@@ -32,7 +32,7 @@ export function useAppActions() {
 					.filter(res => res.status === 'success')
 					.map(res => res.result)
 
-				appState.insertGlyphInfos(glyphs)
+				appState.insertGlyphs(glyphs)
 			},
 		},
 	])

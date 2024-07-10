@@ -23,10 +23,13 @@ type Selection =
 	  }
 
 export const useAppStateStore = defineStore('appState', () => {
+	const Tq = useTweeq()
 	const project = useProjectStore()
 	const api = useAPIStore()
 
 	const selections = ref<Selection[]>([])
+
+	const itemInsertPosition = ref<vec2>(vec2.zero)
 
 	const selectedGlyphs = computed<Glyph[]>(() => {
 		return selections.value.flatMap(sel => {
@@ -51,8 +54,6 @@ export const useAppStateStore = defineStore('appState', () => {
 	} | null>(null)
 
 	const searchHoveredGlyph = ref<GlyphInfo | null>(null)
-
-	const Tq = useTweeq()
 
 	const isPlaying = ref(false)
 
@@ -498,7 +499,7 @@ export const useAppStateStore = defineStore('appState', () => {
 				type: 'glyphSequence',
 				id: 'seq_' + uniqueId(),
 				color: Tq.theme.colorAccent,
-				position: [100, 100],
+				position: itemInsertPosition.value,
 				glyphs: glyphs,
 			})
 
@@ -514,7 +515,8 @@ export const useAppStateStore = defineStore('appState', () => {
 	return {
 		selections,
 		isPlaying,
-		insertGlyphInfos: insertGlyphs,
+		insertGlyphs,
+		itemInsertPosition,
 		searchHoveredGlyph,
 	}
 })

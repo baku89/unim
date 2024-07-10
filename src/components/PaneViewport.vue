@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import {useElementBounding} from '@vueuse/core'
 import {mat2d, vec2} from 'linearly'
+import Tq from 'tweeq'
 import {computed, ref} from 'vue'
 
 import {useViewportStore} from '@/store/viewport'
-import {useZUI} from '@/use/useZUI'
 
 const viewport = useViewportStore()
 
@@ -41,33 +41,24 @@ const transform = computed<mat2d>(() => {
 		return viewport.transform
 	}
 })
-
-useZUI($root, delta => {
-	viewport.transform = mat2d.mul(delta, transform.value)
-})
-
-const styles = computed(() => {
-	return {
-		transform: `matrix(${transform.value.join(',')})`,
-	}
-})
 </script>
 
 <template>
 	<div class="PaneViewport" ref="$root">
-		<svg
-			class="viewport"
-			viewBox="0 0 1000 1000"
-			xmlns="http://www.w3.org/2000/svg"
-			:style="styles"
-		>
-			<path
-				v-for="(shape, index) in viewport.shapes"
-				:d="shape.path"
-				v-bind="shape.style"
-				:key="index"
-			/>
-		</svg>
+		<Tq.PaneZUI :transform="transform">
+			<svg
+				class="viewport"
+				viewBox="0 0 1000 1000"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path
+					v-for="(shape, index) in viewport.shapes"
+					:d="shape.path"
+					v-bind="shape.style"
+					:key="index"
+				/>
+			</svg>
+		</Tq.PaneZUI>
 	</div>
 </template>
 
@@ -76,9 +67,8 @@ const styles = computed(() => {
 	height 100%
 	background #eee
 
+
 .viewport
-	pointer-events none
 	background white
 	width 1000px
-	transform-origin 0 0
 </style>
