@@ -8,7 +8,7 @@ import {computed, ref} from 'vue'
 import {encodeAEKeyframe, parseAEKeyframe} from '@/AEKeyframes'
 import {GlyphInfo, toGlyph, useAPIStore} from '@/store/api'
 
-import {Glyph, useProjectStore} from './project'
+import {Glyph, Item, useProjectStore} from './project'
 
 type Selection =
 	| {
@@ -273,6 +273,31 @@ export const useAppStateStore = defineStore('appState', () => {
 			perform() {
 				swapSelectedGlyph(-1)
 			},
+		},
+		{
+			id: 'split',
+			bind: 'command+shift+d',
+			perform() {
+				const sel = selections.value.at(0)
+				if (!sel || sel.type !== 'sequenceChar') return
+				if (!sel.gap) return
+
+				const item = project.items[sel.index]
+				if (item.type !== 'glyphSequence') return
+
+				const formerItem: Item = {
+					...item,
+					glyphs: item.glyphs.slice(0, sel.charIndex),
+				}
+
+				const latterItem: Item = {
+					...item,
+					position: vec2.add(item.position, [sel.charIndex * 40, 0]),
+					glyphs: item.glyphs.slice(sel.charIndex),
+				}
+
+				project.items.splice(sel.index, 1, formerItem, latterItem)
+			}
 		},
 		{
 			id: 'edit',
