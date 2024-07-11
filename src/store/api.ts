@@ -3,8 +3,9 @@ import {mat2d} from 'linearly'
 import {defineStore} from 'pinia'
 import {computed, ref, toRaw, watchEffect} from 'vue'
 
-import {useSettings} from '@/settings'
 import {Glyph} from '@/store/project'
+
+import {useSettingsStore} from './settings'
 
 type SearchResponse = APIResponse<SearchResponseResult>
 
@@ -58,7 +59,7 @@ export function toGlyph(
 }
 
 export const useAPIStore = defineStore('api', () => {
-	const settings = useSettings()
+	const settings = useSettingsStore()
 
 	const searchWord = ref('')
 	const searchBy = ref<'char' | 'code' | 'index'>('char')
@@ -68,7 +69,7 @@ export const useAPIStore = defineStore('api', () => {
 			return ''
 		}
 		return (
-			settings.apiURL.value +
+			settings.apiURL +
 			'/search?' +
 			new URLSearchParams({[searchBy.value]: searchWord.value}).toString()
 		)
@@ -98,7 +99,7 @@ export const useAPIStore = defineStore('api', () => {
 			strQuery = query
 		}
 
-		const url = `${settings.apiURL.value}/lookup?${new URLSearchParams(strQuery)}`
+		const url = `${settings.apiURL}/lookup?${new URLSearchParams(strQuery)}`
 		const res = await fetch(url)
 		return res.json() as Promise<APIResponse<GlyphInfo>>
 	}

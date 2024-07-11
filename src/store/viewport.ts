@@ -72,7 +72,7 @@ export const useViewportStore = defineStore('viewport', () => {
 
 		shapes.push(
 			...appState.hoveredGlyphs.map(glyph => ({
-				style: {fill: 'var(--tq-color-accent)', opacity: 0.2},
+				style: {fill: '#ff0000', opacity: 0.5},
 				path: glyph.path,
 			}))
 		)

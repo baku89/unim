@@ -1,6 +1,7 @@
+import { defineStore } from 'pinia'
 import {useTweeq} from 'tweeq'
 
-export function useSettings() {
+export const useSettingsStore = defineStore('settings', () => {
 	const Tq = useTweeq()
 
 	const apiURL = Tq.config.ref('apiURL', 'http://localhost:8123')
@@ -33,4 +34,4 @@ export function useSettings() {
 	return {
 		apiURL,
 	}
-}
+})

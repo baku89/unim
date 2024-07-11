@@ -2760,6 +2760,17 @@ bndr-js@^0.15.0:
     linearly "^0.20.3"
     lodash-es "^4.17.21"
 
+bndr-js@^0.15.1:
+  version "0.15.1"
+  resolved "https://registry.yarnpkg.com/bndr-js/-/bndr-js-0.15.1.tgz#a0d491242fd3c797daf4514bf12a6b6ecd339a67"
+  integrity sha512-sVDE+jXkFMws6WSciP6pc2RTFK3SdJ0b3gcVnxDmlMCGdX3U5N3nAr/W1fa9SYXd5uzyWIlnTKnBupFMAfY81w==
+  dependencies:
+    "@types/lodash-es" "^4.17.12"
+    case "^1.6.3"
+    hotkeys-js "^3.10.2"
+    linearly "^0.20.3"
+    lodash-es "^4.17.21"
+
 boolbase@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/boolbase/-/boolbase-1.0.0.tgz#68dff5fbe60c51eb37725ea9e3ed310dcc1e776e"

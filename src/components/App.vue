@@ -2,7 +2,6 @@
 import {initTweeq, useTweeq} from 'tweeq'
 
 import {useAppActions} from '@/appActions'
-import {useSettings} from '@/settings'
 
 import PaneItems from './PaneItems.vue'
 import PaneSearch from './PaneSearch.vue'
@@ -18,7 +17,6 @@ initTweeq('com.baku89.unim', {
 
 const Tq = useTweeq()
 
-useSettings()
 useAppActions()
 </script>
 

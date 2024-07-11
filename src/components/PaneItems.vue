@@ -5,7 +5,7 @@ import * as Bndr from 'bndr-js'
 import {mat2d, vec2} from 'linearly'
 import {useBndr} from 'tweeq'
 import Tq from 'tweeq'
-import {ref, shallowRef} from 'vue'
+import { ref, shallowRef} from 'vue'
 
 import {useAppStateStore} from '@/store/appState'
 
@@ -29,7 +29,7 @@ function onPointerleave() {
 }
 
 useBndr($root, root => {
-	const emitter = Bndr.pointer(root).button('left')
+	const emitter = Bndr.pointer(root).left
 
 	emitter.drag().on(dd => {
 		if (dd.type === 'down') {

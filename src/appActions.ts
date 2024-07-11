@@ -1,14 +1,14 @@
 import {useTweeq} from 'tweeq'
 
-import {useSettings} from './settings'
 import {APIResponse, GlyphInfo} from './store/api'
 import {useAppStateStore} from './store/appState'
+import {useSettingsStore} from './store/settings'
 import {getGrapheme} from './util'
 
 export function useAppActions() {
 	const Tq = useTweeq()
 
-	const settings = useSettings()
+	const settings = useSettingsStore()
 	const appState = useAppStateStore()
 
 	Tq.actions.register([
@@ -21,7 +21,7 @@ export function useAppActions() {
 				if (!texts) return
 
 				const chars = getGrapheme(texts).map(async char => {
-					const url = `${settings.apiURL.value}/lookup?${new URLSearchParams({char})}`
+					const url = `${settings.apiURL}/lookup?${new URLSearchParams({char})}`
 					const res = await fetch(url)
 					return res.json()
 				})
