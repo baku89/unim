@@ -27,6 +27,16 @@ export const useViewportStore = defineStore('viewport', () => {
 	const onionskinCount = ref<[prevCount: number, nextCount: number]>([0, 2])
 	const showOnionskin = ref(false)
 
+	Tq.actions.register([
+		{
+			id: 'toggle_onionskin',
+			bind: 'o',
+			perform() {
+				showOnionskin.value = !showOnionskin.value
+			},
+		},
+	])
+
 	const selectedShapes = computed<Shape[]>(() => {
 		const shapes: Shape[] = []
 
