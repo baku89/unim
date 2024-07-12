@@ -1,11 +1,11 @@
 import {whenever} from '@vueuse/core'
+import {parseAEKeyframe, printAEKeyframe} from 'ae-keyframes'
 import {mat2d, scalar, vec2} from 'linearly'
 import {uniqueId} from 'lodash'
 import {defineStore} from 'pinia'
 import {useTweeq} from 'tweeq'
 import {computed, ref} from 'vue'
 
-import {encodeAEKeyframe, parseAEKeyframe} from '@/AEKeyframes'
 import {GlyphInfo, toGlyph, useAPIStore} from '@/store/api'
 
 import {Glyph, Item, useProjectStore} from './project'
@@ -297,7 +297,7 @@ export const useAppStateStore = defineStore('appState', () => {
 				}
 
 				project.items.splice(sel.index, 1, formerItem, latterItem)
-			}
+			},
 		},
 		{
 			id: 'edit',
@@ -309,24 +309,14 @@ export const useAppStateStore = defineStore('appState', () => {
 					perform: async () => {
 						const keyframes = selectedGlyphs.value.map((g, frame) => ({
 							frame,
-							values: [g.index / 24],
+							value: g.index / 24,
 						}))
 
-						const aeKeyframeData = encodeAEKeyframe({
+						const aeKeyframeData = printAEKeyframe({
 							frameRate: project.frameRate,
-							compSize: [1000, 1000],
-							sourcePixelAspectRatio: 1,
-							compPixelAspectRatio: 1,
 							layers: [
 								{
-									name: 'Layer',
-									properties: [
-										{
-											type: 'Time Remap',
-											name: '',
-											keyframes,
-										},
-									],
+									timeRemap: keyframes,
 								},
 							],
 						})
@@ -365,11 +355,12 @@ export const useAppStateStore = defineStore('appState', () => {
 						} else if (clipboard.startsWith('Adobe After Effects')) {
 							const aeKeyframeData = parseAEKeyframe(clipboard)
 
-							const layer = aeKeyframeData.layers[0]
+							const timeRemap = aeKeyframeData.layers.at(0)?.timeRemap
 
-							const keyframes = layer.properties.flatMap(p => p.keyframes)
-							const minFrame = Math.min(...keyframes.map(k => k.frame))
-							const maxFrame = Math.max(...keyframes.map(k => k.frame))
+							if (!timeRemap) return
+
+							const minFrame = Math.min(...timeRemap.map(k => k.frame))
+							const maxFrame = Math.max(...timeRemap.map(k => k.frame))
 
 							const frames = Array(maxFrame - minFrame + 1)
 								.fill(null)
@@ -386,13 +377,9 @@ export const useAppStateStore = defineStore('appState', () => {
 										}
 								)
 
-							for (const prop of layer.properties) {
-								if (prop.type === 'Time Remap') {
-									for (const keyframe of prop.keyframes) {
-										const frame = frames[keyframe.frame - minFrame]
-										frame.index = Math.round(keyframe.values[0] * 24)
-									}
-								}
+							for (const keyframe of timeRemap) {
+								const frame = frames[keyframe.frame - minFrame]
+								frame.index = Math.round(keyframe.value * 24)
 							}
 
 							let index = 0,
@@ -477,23 +464,6 @@ export const useAppStateStore = defineStore('appState', () => {
 			bind: ['command+down', 's'],
 			perform() {
 				offsetSelectedGlyphsDuration(-1)
-			},
-		},
-		{
-			id: 'paste-keyframes',
-			bind: ['command+shift+v'],
-			perform: async () => {
-				const clipboard = await navigator.clipboard.readText()
-
-				const {
-					layers: [layer],
-				} = parseAEKeyframe(clipboard)
-
-				const timeRemap = layer.properties.find(
-					p => p.type === 'Time Remap'
-				)?.keyframes
-
-				if (!timeRemap) return
 			},
 		},
 	])
