@@ -11,7 +11,7 @@ const api = useAPIStore()
 const Tq = useTweeq()
 const appState = useAppStateStore()
 
-const filterBy = ref<'code' | 'similarity'>('code')
+const filterBy = ref<'code' | 'phash' | 'cnn'>('code')
 
 const glyphs = computed(() => {
 	if (!api.result) return []
@@ -22,8 +22,10 @@ const glyphs = computed(() => {
 			{...api.result.original, original: true},
 			...api.result.code.after,
 		]
+	} else if (filterBy.value === 'phash') {
+		return [{...api.result.original, original: true}, ...api.result.phash]
 	} else {
-		return [{...api.result.original, original: true}, ...api.result.similarity]
+		return [{...api.result.original, original: true}, ...api.result.cnn]
 	}
 })
 </script>
@@ -39,7 +41,11 @@ const glyphs = computed(() => {
 			/>
 		</div>
 		<div class="row">
-			<Tq.InputRadio v-model="filterBy" :options="['code', 'similarity']" />
+			<Tq.InputRadio
+				v-model="filterBy"
+				:options="['code', 'phash', 'cnn']"
+				:labels="['Code', 'pHash', 'CNN']"
+			/>
 		</div>
 		<div class="grid">
 			<GlyphInfoViewer

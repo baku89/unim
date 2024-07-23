@@ -19,7 +19,8 @@ interface SearchResponseResult {
 		before: GlyphInfo[]
 		after: GlyphInfo[]
 	}
-	similarity: GlyphInfoSimilarity[]
+	phash: GlyphInfoSimilarity[]
+	cnn: GlyphInfoSimilarity[]
 }
 
 export interface GlyphInfo {
