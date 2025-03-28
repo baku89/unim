@@ -63,7 +63,7 @@ export const useAPIStore = defineStore('api', () => {
 	const settings = useSettingsStore()
 
 	const searchWord = ref('')
-	const searchBy = ref<'char' | 'code' | 'index'>('char')
+	const searchBy = ref<'char' | 'code' | 'index' | 'image'>('char')
 
 	const restURL = computed(() => {
 		if (!searchWord.value) {

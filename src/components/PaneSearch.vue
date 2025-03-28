@@ -5,6 +5,7 @@ import {computed, ref} from 'vue'
 import GlyphInfoViewer from '@/components/GlyphInfoViewer.vue'
 import {useAPIStore} from '@/store/api'
 import {useAppStateStore} from '@/store/appState'
+import {blobToBase64} from '@/util'
 
 const api = useAPIStore()
 
@@ -28,6 +29,40 @@ const glyphs = computed(() => {
 		return [{...api.result.original, original: true}, ...api.result.cnn]
 	}
 })
+
+Tq.actions.register([
+	{
+		id: 'searchByImage',
+		label: 'Search by Image',
+		icon: 'mdi:image-search',
+		perform: async () => {
+			// Copy iamge from clipboard
+			try {
+				const contents = await navigator.clipboard.read()
+
+				const pngItems = contents.filter(item =>
+					item.types.includes('image/png')
+				)
+
+				if (pngItems.length === 0) {
+					// eslint-disable-next-line no-console
+					console.error('No image found in clipboard')
+					return
+				}
+
+				const pngItem = pngItems[0]
+				const blob = await pngItem.getType('image/png')
+				const base64 = await blobToBase64(blob, [160, 160])
+
+				api.searchWord = base64
+				api.searchBy = 'image'
+			} catch (e) {
+				// eslint-disable-next-line no-console
+				console.error(e)
+			}
+		},
+	},
+])
 </script>
 
 <template>
@@ -36,7 +71,7 @@ const glyphs = computed(() => {
 			<Tq.InputString v-model="api.searchWord" />
 			<Tq.InputRadio
 				v-model="api.searchBy"
-				:options="['char', 'code', 'index']"
+				:options="['char', 'code', 'index', 'image']"
 				style="width: 20rem"
 			/>
 		</div>
