@@ -49,7 +49,9 @@ export async function exportGlyphsAsGif(
 		const path = new Path2D(glyph.path)
 		ctx.fill(path)
 
-		encoder.addFrame(ctx)
+		for (let i = 0; i < glyph.duration; i++) {
+			encoder.addFrame(ctx)
+		}
 	}
 
 	encoder.finish()
