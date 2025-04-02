@@ -11,7 +11,7 @@ const api = useAPIStore()
 const Tq = useTweeq()
 const appState = useAppStateStore()
 
-const filterBy = ref<'code' | 'phash' | 'cnn'>('code')
+const filterBy = ref<'code' | 'phash' | 'cnn' | 'name'>('code')
 
 const glyphs = computed(() => {
 	if (!api.result) return []
@@ -24,6 +24,8 @@ const glyphs = computed(() => {
 		]
 	} else if (filterBy.value === 'phash') {
 		return [{...api.result.original, original: true}, ...api.result.phash]
+	} else if (filterBy.value === 'name') {
+		return [{...api.result.original, original: true}, ...api.result.name]
 	} else {
 		return [{...api.result.original, original: true}, ...api.result.cnn]
 	}
@@ -62,13 +64,23 @@ const glyphs = computed(() => {
 // 		},
 // 	},
 // ])
+
+function onSearchWordChange() {
+	if (api.searchBy === 'index') {
+		api.searchBy = 'char'
+	}
+}
 </script>
 
 <template>
 	<div class="PaneSearch">
 		<div class="row">
-			<Tq.InputString v-model="api.searchWord" />
+			<Tq.InputString
+				v-model="api.searchWord"
+				@update:modelValue="onSearchWordChange"
+			/>
 			<Tq.InputRadio
+				class="search-by"
 				v-model="api.searchBy"
 				:options="['char', 'code', 'index' /*, 'image'*/]"
 				:icons="[
@@ -82,12 +94,13 @@ const glyphs = computed(() => {
 		<div class="row">
 			<Tq.InputRadio
 				v-model="filterBy"
-				:options="['code', 'phash', 'cnn']"
-				:labels="['Code', 'pHash', 'CNN']"
+				:options="['code', 'phash', 'cnn', 'name']"
+				:labels="['Code', 'pHash', 'Tokui CNN', 'Name']"
 				:icons="[
 					'material-symbols:table',
 					'line-md:hash',
 					'icon-park-outline:neural',
+					'mingcute:thought-fill',
 				]"
 			/>
 		</div>
@@ -121,9 +134,14 @@ const glyphs = computed(() => {
 	& > *
 		flex-grow 1
 
+.search-by
+	flex-grow 0
+
 .grid
 	display grid
 	grid-template-columns repeat(auto-fill, minmax(100px, 1fr))
+	overflow-x hidden
+	scrollbar-gutter stable
 
 	gap 1em
 	flex-grow 1

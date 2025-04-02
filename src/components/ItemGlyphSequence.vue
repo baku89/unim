@@ -99,7 +99,7 @@ function onSelect(charIndex: number) {
 <style lang="stylus" scoped>
 .ItemGlyphSequence
 	position absolute
-	border 1px solid var(--tq-color-border)
+	outline 1px solid var(--tq-color-border)
 	border-radius 0 var(--tq-radius-input) var(--tq-radius-input) var(--tq-radius-input)
 	background white
 

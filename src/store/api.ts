@@ -21,6 +21,7 @@ interface SearchResponseResult {
 	}
 	phash: GlyphInfoSimilarity[]
 	cnn: GlyphInfoSimilarity[]
+	name: GlyphInfoSimilarity[]
 }
 
 export interface GlyphInfo {
@@ -87,10 +88,23 @@ export const useAPIStore = defineStore('api', () => {
 		result.value = data.value.result
 	})
 
-	function searchByGlyph(glyph: Glyph | GlyphInfo) {
-		searchWord.value = glyph.index.toString()
-		console.log(glyph)
-		searchBy.value = 'index'
+	async function searchByGlyph(glyph: Glyph | GlyphInfo) {
+		glyph = toGlyph(glyph)
+
+		const code =
+			typeof glyph.code === 'number'
+				? glyph.code
+				: glyph.code.length === 1
+					? glyph.code[0]
+					: null
+
+		if (code) {
+			searchWord.value = String.fromCodePoint(code)
+			searchBy.value = 'char'
+		} else {
+			searchWord.value = glyph.index.toString()
+			searchBy.value = 'index'
+		}
 	}
 
 	async function lookup(query: {char: string} | {index: number}) {
