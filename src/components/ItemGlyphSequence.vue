@@ -104,7 +104,7 @@ function onSelect(charIndex: number) {
 	background white
 
 	&:has(.id:hover)
-		outline 2px solid var(--tq-color-input-vivid-accent)
+		outline 2px solid var(--tq-color-accent-soft)
 
 	&.selected
 		outline 2px solid var(--tq-color-accent) !important
@@ -127,9 +127,10 @@ function onSelect(charIndex: number) {
 	width 1em
 	margin 0 -0.5em
 	z-index 100
+	border-radius 999px
 
 	&:hover
-		background var(--tq-color-input-vivid-accent)
+		background var(--tq-color-accent-soft)
 
 	&.selected
 		background var(--tq-color-accent)
@@ -141,7 +142,7 @@ function onSelect(charIndex: number) {
 	border-radius var(--tq-radius-input)
 
 	&:hover
-		outline 2px solid var(--tq-color-input-vivid-accent)
+		outline 2px solid var(--tq-color-accent-soft)
 
 	&.selected
 		outline 2px solid var(--tq-color-accent) !important

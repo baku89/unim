@@ -38,14 +38,14 @@ const viewport = useViewportStore()
 					inlinePosition="start"
 				/>
 				<Tq.InputNumber
-					v-model="viewport.onionskinCount[0]"
+					:modelValue="-viewport.onionskinCount[0]"
 					:precision="0"
-					:min="0"
-					:max="5"
+					:min="-5"
+					:max="0"
 					:step="1"
-					:bar="false"
 					style="width: 3em"
 					inlinePosition="middle"
+					@update:modelValue="viewport.onionskinCount[0] = -$event"
 				/>
 				<Tq.InputNumber
 					v-model="viewport.onionskinCount[1]"
@@ -53,7 +53,6 @@ const viewport = useViewportStore()
 					:min="0"
 					:max="5"
 					:step="1"
-					:bar="false"
 					style="width: 3em"
 					inlinePosition="end"
 				/>
