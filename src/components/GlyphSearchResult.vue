@@ -16,7 +16,7 @@ const code = computed(() => {
 	<div class="GlyphInfo" :class="{original}">
 		<div class="code">{{ code }}</div>
 		<div class="name">
-			{{ title(name.toLowerCase().replaceAll('_', ', ')) }}
+			{{ title(name.toLowerCase().replaceAll('(?)', '').replaceAll('_', ' ')) }}
 		</div>
 		<GlyphThumb class="glyph" :path="path" />
 	</div>

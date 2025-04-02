@@ -2,10 +2,9 @@
 import {useTweeq} from 'tweeq'
 import {computed, ref} from 'vue'
 
-import GlyphInfoViewer from '@/components/GlyphInfoViewer.vue'
+import GlyphSearchResult from '@/components/GlyphSearchResult.vue'
 import {useAPIStore} from '@/store/api'
 import {useAppStateStore} from '@/store/appState'
-import {blobToBase64} from '@/util'
 
 const api = useAPIStore()
 
@@ -30,39 +29,39 @@ const glyphs = computed(() => {
 	}
 })
 
-Tq.actions.register([
-	{
-		id: 'searchByImage',
-		label: 'Search by Image',
-		icon: 'mdi:image-search',
-		perform: async () => {
-			// Copy iamge from clipboard
-			try {
-				const contents = await navigator.clipboard.read()
+// Tq.actions.register([
+// 	{
+// 		id: 'searchByImage',
+// 		label: 'Search by Image',
+// 		icon: 'mdi:image-search',
+// 		perform: async () => {
+// 			// Copy iamge from clipboard
+// 			try {
+// 				const contents = await navigator.clipboard.read()
 
-				const pngItems = contents.filter(item =>
-					item.types.includes('image/png')
-				)
+// 				const pngItems = contents.filter(item =>
+// 					item.types.includes('image/png')
+// 				)
 
-				if (pngItems.length === 0) {
-					// eslint-disable-next-line no-console
-					console.error('No image found in clipboard')
-					return
-				}
+// 				if (pngItems.length === 0) {
+// 					// eslint-disable-next-line no-console
+// 					console.error('No image found in clipboard')
+// 					return
+// 				}
 
-				const pngItem = pngItems[0]
-				const blob = await pngItem.getType('image/png')
-				const base64 = await blobToBase64(blob, [160, 160])
+// 				const pngItem = pngItems[0]
+// 				const blob = await pngItem.getType('image/png')
+// 				const base64 = await blobToBase64(blob, [160, 160])
 
-				api.searchWord = base64
-				api.searchBy = 'image'
-			} catch (e) {
-				// eslint-disable-next-line no-console
-				console.error(e)
-			}
-		},
-	},
-])
+// 				api.searchWord = base64
+// 				api.searchBy = 'image'
+// 			} catch (e) {
+// 				// eslint-disable-next-line no-console
+// 				console.error(e)
+// 			}
+// 		},
+// 	},
+// ])
 </script>
 
 <template>
@@ -71,8 +70,13 @@ Tq.actions.register([
 			<Tq.InputString v-model="api.searchWord" />
 			<Tq.InputRadio
 				v-model="api.searchBy"
-				:options="['char', 'code', 'index', 'image']"
-				style="width: 20rem"
+				:options="['char', 'code', 'index' /*, 'image'*/]"
+				:icons="[
+					'tabler:alphabet-hebrew',
+					'material-symbols:table',
+					'mdi:numeric',
+					// 'mdi:image-search',
+				]"
 			/>
 		</div>
 		<div class="row">
@@ -80,10 +84,15 @@ Tq.actions.register([
 				v-model="filterBy"
 				:options="['code', 'phash', 'cnn']"
 				:labels="['Code', 'pHash', 'CNN']"
+				:icons="[
+					'material-symbols:table',
+					'line-md:hash',
+					'icon-park-outline:neural',
+				]"
 			/>
 		</div>
 		<div class="grid">
-			<GlyphInfoViewer
+			<GlyphSearchResult
 				v-for="glyph in glyphs"
 				:key="glyph.code_str"
 				v-bind="glyph"
