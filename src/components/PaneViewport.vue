@@ -1,42 +1,21 @@
 <script setup lang="ts">
-import {useElementBounding} from '@vueuse/core'
 import {mat2d, vec2} from 'linearly'
+import {Rect} from 'geome'
 import * as Tq from 'tweeq'
-import {computed, useTemplateRef} from 'vue'
+import {computed, shallowRef} from 'vue'
 
 import {useViewportStore} from '@/store/viewport'
 
 const viewport = useViewportStore()
 
-const $root = useTemplateRef('$root')
-
-const bound = useElementBounding($root)
+const paneSize = shallowRef<vec2>([0, 0])
 
 const transform = computed<mat2d>(() => {
 	if (viewport.transform === 'fit') {
-		const resx = 1000
-		const resy = 1000
+		const glyphRect = Rect.bySize([0, 0], [1000, 1000])
+		const viewportRect = Rect.bySize([0, 0], paneSize.value)
 
-		const viewportRatio = bound.height.value / bound.width.value
-		const frameRatio = resy / resx
-
-		if (frameRatio < viewportRatio) {
-			// Fit width
-			const scale = bound.width.value / resx
-			const frameHeight = resy * scale
-
-			const offset: vec2 = [0, (bound.height.value - frameHeight) / 2]
-
-			return mat2d.mul(mat2d.fromTranslation(offset), mat2d.fromScaling(scale))
-		} else {
-			// Fit height
-			const scale = bound.height.value / resy
-			const frameWidth = resx * scale
-
-			const offset: vec2 = [(bound.width.value - frameWidth) / 2, 0]
-
-			return mat2d.mul(mat2d.fromTranslation(offset), mat2d.fromScaling(scale))
-		}
+		return Rect.objectFit(viewportRect, glyphRect)
 	} else {
 		return viewport.transform
 	}
@@ -45,7 +24,11 @@ const transform = computed<mat2d>(() => {
 
 <template>
 	<div class="PaneViewport" ref="$root">
-		<Tq.PaneZUI :transform="transform">
+		<Tq.PaneZUI
+			:transform="transform"
+			@update:transform="viewport.transform = $event"
+			v-model:size="paneSize"
+		>
 			<svg
 				class="viewport"
 				viewBox="0 0 1000 1000"
