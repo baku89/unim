@@ -89,6 +89,7 @@ export const useAPIStore = defineStore('api', () => {
 
 	function searchByGlyph(glyph: Glyph | GlyphInfo) {
 		searchWord.value = glyph.index.toString()
+		console.log(glyph)
 		searchBy.value = 'index'
 	}
 

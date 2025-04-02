@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {computed} from 'vue'
+import {title} from 'case'
 
 import {GlyphInfo} from '../store/api'
 import GlyphThumb from './GlyphThumb.vue'
@@ -14,9 +15,9 @@ const code = computed(() => {
 <template>
 	<div class="GlyphInfo" :class="{original}">
 		<div class="code">{{ code }}</div>
-		<!-- <div class="name">
+		<div class="name">
 			{{ title(name.toLowerCase().replaceAll('_', ', ')) }}
-		</div> -->
+		</div>
 		<GlyphThumb class="glyph" :path="path" />
 	</div>
 </template>
@@ -25,12 +26,11 @@ const code = computed(() => {
 .GlyphInfo
 	position relative
 	aspect-ratio 1
-	border-radius var(--tq-input-border-radius)
+	border-radius var(--tq-radius-input)
 	width 100%
 
-
 	&:hover
-		background var(--tq-color-input-tinted-accent)
+		background var(--tq-color-accent-soft)
 
 	&.original
 		box-shadow 0 0 0 3px var(--tq-color-accent) inset
@@ -48,11 +48,10 @@ const code = computed(() => {
 
 .name
 	bottom 0.5em
-
-
+	color var(--tq-color-background)
 
 .code
-	color var(--tq-color-gray-on-background)
+	color var(--tq-color-text-mute)
 	font-family var(--tq-font-code)
 	user-select all
 	font-size 0.8em
@@ -63,6 +62,7 @@ const code = computed(() => {
 	left 0
 	width 100%
 	height 100%
+	z-index 100
 	fill currentColor
 	pointer-events none
 </style>

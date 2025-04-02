@@ -99,8 +99,8 @@ function onSelect(charIndex: number) {
 <style lang="stylus" scoped>
 .ItemGlyphSequence
 	position absolute
-	border 1px solid var(--tq-color-gray-on-background)
-	border-radius 0 var(--tq-input-border-radius) var(--tq-input-border-radius) var(--tq-input-border-radius)
+	border 1px solid var(--tq-color-border)
+	border-radius 0 var(--tq-radius-input) var(--tq-radius-input) var(--tq-radius-input)
 	background white
 
 	&:has(.id:hover)
@@ -117,7 +117,7 @@ function onSelect(charIndex: number) {
 	background v-bind(color)
 	color var(--tq-color-background)
 	padding 0.25em
-	border-radius var(--tq-input-border-radius) var(--tq-input-border-radius) 0 0
+	border-radius var(--tq-radius-input) var(--tq-radius-input) 0 0
 
 .glyphs
 	display flex
@@ -138,7 +138,7 @@ function onSelect(charIndex: number) {
 	pointer-events all
 	aspect-ratio 1
 	height 40px
-	border-radius var(--tq-input-border-radius)
+	border-radius var(--tq-radius-input)
 
 	&:hover
 		outline 2px solid var(--tq-color-input-vivid-accent)

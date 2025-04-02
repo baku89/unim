@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import Tq from 'tweeq'
+import * as Tq from 'tweeq'
 
 import {useAppStateStore} from '@/store/appState'
 import {useProjectStore} from '@/store/project'
@@ -13,11 +13,11 @@ const viewport = useViewportStore()
 <template>
 	<Tq.TitleBar name="Unim" icon="favicon.svg">
 		<template #center>
-			<div style="display: flex">
-				<Tq.InputIconToggle
+			<Tq.InputGroup>
+				<Tq.InputCheckbox
 					v-model="appState.isPlaying"
 					:icon="appState.isPlaying ? 'mdi:pause' : 'mdi:play'"
-					horizontalPosition="left"
+					inlinePosition="start"
 				/>
 				<Tq.InputNumber
 					v-model="project.frameRate"
@@ -28,14 +28,14 @@ const viewport = useViewportStore()
 					:bar="false"
 					suffix=" fps"
 					style="width: 5em"
-					horizontalPosition="right"
+					inlinePosition="end"
 				/>
-			</div>
-			<div style="display: flex">
-				<Tq.InputIconToggle
+			</Tq.InputGroup>
+			<Tq.InputGroup>
+				<Tq.InputCheckbox
 					v-model="viewport.showOnionskin"
 					icon="fluent-emoji-high-contrast:onion"
-					horizontalPosition="left"
+					inlinePosition="start"
 				/>
 				<Tq.InputNumber
 					v-model="viewport.onionskinCount[0]"
@@ -45,7 +45,7 @@ const viewport = useViewportStore()
 					:step="1"
 					:bar="false"
 					style="width: 3em"
-					horizontalPosition="middle"
+					inlinePosition="middle"
 				/>
 				<Tq.InputNumber
 					v-model="viewport.onionskinCount[1]"
@@ -55,9 +55,9 @@ const viewport = useViewportStore()
 					:step="1"
 					:bar="false"
 					style="width: 3em"
-					horizontalPosition="right"
+					inlinePosition="end"
 				/>
-			</div>
+			</Tq.InputGroup>
 		</template>
 	</Tq.TitleBar>
 </template>

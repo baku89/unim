@@ -21,11 +21,11 @@ useAppActions()
 </script>
 
 <template>
-	<div class="App">
-		<Tq.CommandPalette />
-		<Tq.PaneModalComplex />
-		<TitleBar />
-		<main class="main">
+	<Tq.App>
+		<template #title>
+			<TitleBar />
+		</template>
+		<template #default>
 			<Tq.PaneSplit
 				name="vertical"
 				direction="vertical"
@@ -49,8 +49,8 @@ useAppActions()
 					<PaneItems />
 				</template>
 			</Tq.PaneSplit>
-		</main>
-	</div>
+		</template>
+	</Tq.App>
 </template>
 
 <style lang="stylus" scoped>

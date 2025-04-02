@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import {useElementBounding} from '@vueuse/core'
 import {mat2d, vec2} from 'linearly'
-import Tq from 'tweeq'
-import {computed, ref} from 'vue'
+import * as Tq from 'tweeq'
+import {computed, useTemplateRef} from 'vue'
 
 import {useViewportStore} from '@/store/viewport'
 
 const viewport = useViewportStore()
 
-const $root = ref<HTMLElement | null>(null)
+const $root = useTemplateRef('$root')
 
 const bound = useElementBounding($root)
 

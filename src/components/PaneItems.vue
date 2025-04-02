@@ -4,8 +4,8 @@ import {useMagicKeys} from '@vueuse/core'
 import * as Bndr from 'bndr-js'
 import {mat2d, vec2} from 'linearly'
 import {useBndr} from 'tweeq'
-import Tq from 'tweeq'
-import { ref, shallowRef} from 'vue'
+import * as Tq from 'tweeq'
+import {ref, shallowRef} from 'vue'
 
 import {useAppStateStore} from '@/store/appState'
 
