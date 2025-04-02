@@ -29,7 +29,7 @@
 		"howler": "^2.2.4",
 		"linearly": "^0.32.0",
 		"lodash": "^4.17.21",
-		"pinia": "^2.1.7",
+		"pinia": "^3.0.1",
 		"prettier": "^3.2.4",
 		"prettier-plugin-stylus": "^0.1.0",
 		"stylus": "^0.62.0",
