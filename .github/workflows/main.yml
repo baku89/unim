@@ -35,7 +35,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 23
       - name: Run install
         uses: borales/actions-yarn@v4
         with:
@@ -49,12 +49,11 @@ jobs:
         with:
           cmd: build
       - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/configure-pages@v5
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          # Upload dist repository
-          path: './dist'
+          path: dist/
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
