@@ -14,7 +14,7 @@ export interface Glyph {
 	index: number
 	/** Unicodeの名前 */
 	name: string
-	fontName: string
+	font: string
 	duration: number
 	/** 追加のアトリビュート、偏の位置とか */
 	meta: Record<string, number | vec2 | string | boolean>

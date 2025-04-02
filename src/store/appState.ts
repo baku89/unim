@@ -4,7 +4,7 @@ import {mat2d, scalar, vec2} from 'linearly'
 import {uniqueId} from 'lodash'
 import {defineStore} from 'pinia'
 import {useTweeq} from 'tweeq'
-import {computed, ref, toRaw, unref} from 'vue'
+import {computed, ref} from 'vue'
 
 import {GlyphInfo, toGlyph, useAPIStore} from '@/store/api'
 
@@ -194,6 +194,8 @@ export const useAppStateStore = defineStore('appState', () => {
 
 						// deep clone the selected glyphs
 						const glyphs = JSON.parse(JSON.stringify(selectedGlyphs.value))
+
+						console.log(glyphs)
 
 						copiedGlyphs.value = {
 							aeKeyframeData,
