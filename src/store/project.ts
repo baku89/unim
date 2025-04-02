@@ -1,6 +1,7 @@
 import {mat2d, vec2} from 'linearly'
 import {defineStore} from 'pinia'
 import {reactive, toRefs, watchEffect} from 'vue'
+import {defaultItems} from './defaultItems'
 
 export interface Glyph {
 	path: string
@@ -13,7 +14,7 @@ export interface Glyph {
 	index: number
 	/** Unicodeの名前 */
 	name: string
-	font: string
+	fontName: string
 	duration: number
 	/** 追加のアトリビュート、偏の位置とか */
 	meta: Record<string, number | vec2 | string | boolean>
@@ -75,15 +76,15 @@ type SemVer = `${number}.${number}.${number}`
 
 export interface UnimProject {
 	version: SemVer
-	frameRate: 24
+	frameRate: number
 	items: Item[]
 }
 
 export const useProjectStore = defineStore('project', () => {
 	const project = reactive<UnimProject>({
 		version: '0.0.1',
-		frameRate: 24,
-		items: [],
+		frameRate: 15,
+		items: defaultItems,
 	})
 
 	const savedProject = localStorage.getItem('com.baku89.unim.project')
