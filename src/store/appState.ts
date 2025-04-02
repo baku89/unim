@@ -4,11 +4,12 @@ import {mat2d, scalar, vec2} from 'linearly'
 import {uniqueId} from 'lodash'
 import {defineStore} from 'pinia'
 import {useTweeq} from 'tweeq'
-import {computed, ref} from 'vue'
+import {computed, ref, toRaw, unref} from 'vue'
 
 import {GlyphInfo, toGlyph, useAPIStore} from '@/store/api'
 
 import {Glyph, Item, useProjectStore} from './project'
+import {exportGlyphsAsGif} from '@/utils/exportGlyphsAsGif'
 
 type Selection =
 	| {
@@ -477,6 +478,19 @@ export const useAppStateStore = defineStore('appState', () => {
 			bind: ['command+down', 's'],
 			perform() {
 				offsetSelectedGlyphsDuration(-1)
+			},
+		},
+
+		{
+			id: 'export_gif',
+			bind: 'command + e',
+			perform: async () => {
+				const glyphs = selectedGlyphs.value
+				exportGlyphsAsGif(glyphs, {
+					background: '#ffffff',
+					textColor: '#000000',
+					frameRate: project.frameRate,
+				})
 			},
 		},
 	])
