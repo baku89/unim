@@ -15,6 +15,7 @@ export function useAppActions() {
 		{
 			id: 'insert_texts',
 			bind: 'i',
+			icon: 'material-symbols:abc',
 			perform: async () => {
 				const texts = prompt('Enter texts')
 

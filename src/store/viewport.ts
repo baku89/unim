@@ -30,6 +30,7 @@ export const useViewportStore = defineStore('viewport', () => {
 	Tq.actions.register([
 		{
 			id: 'toggle_onionskin',
+			icon: 'fluent-emoji-high-contrast:onion',
 			bind: 'o',
 			perform() {
 				showOnionskin.value = !showOnionskin.value
@@ -102,6 +103,7 @@ export const useViewportStore = defineStore('viewport', () => {
 				{
 					id: 'fit_viewport',
 					bind: 'h',
+					icon: 'mdi:fit-to-screen',
 					perform() {
 						transform.value = 'fit'
 					},

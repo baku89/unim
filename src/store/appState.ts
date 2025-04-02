@@ -167,140 +167,8 @@ export const useAppStateStore = defineStore('appState', () => {
 
 	Tq.actions.register([
 		{
-			id: 'deselect',
-			bind: 'esc',
-			perform() {
-				selections.value = []
-			},
-		},
-		{
-			id: 'delete',
-			bind: 'backspace',
-			perform() {
-				let nextSelection: Selection[] = []
-
-				if (selections.value.length === 1) {
-					const sel = selections.value[0]
-					if (sel.type === 'sequenceChar' && !sel.gap) {
-						const {index, charIndex} = sel
-						const item = project.items[index]
-
-						if (item.type === 'glyphSequence' && item.glyphs.length > 1) {
-							const nextCharIndex = Math.min(charIndex, item.glyphs.length - 2)
-							nextSelection = [
-								{
-									type: 'sequenceChar',
-									index,
-									charIndex: nextCharIndex,
-									gap: false,
-								},
-							]
-						}
-					}
-				}
-
-				// Sort selections by index in descending order
-				const sels = selections.value.slice().sort((a, b) => {
-					if (a.type === 'sequenceChar' && b.type === 'sequenceChar') {
-						if (a.index === b.index) {
-							return b.charIndex - a.charIndex
-						}
-					}
-					return b.index - a.index
-				})
-
-				for (const selection of sels) {
-					if (selection.type === 'item') {
-						project.items.splice(selection.index, 1)
-						selections.value = []
-					} else if (selection.type === 'sequenceChar' && !selection.gap) {
-						const item = project.items[selection.index]
-						if (item.type === 'glyphSequence') {
-							item.glyphs.splice(selection.charIndex, 1)
-							if (item.glyphs.length === 0) {
-								project.items.splice(selection.index, 1)
-								selections.value = []
-							}
-						}
-					}
-				}
-
-				selections.value = nextSelection
-			},
-		},
-		{
-			id: 'toggle_play',
-			icon: 'mdi:play',
-			bind: ['space'],
-			perform() {
-				if (selections.value[0]?.type === 'item') {
-					selections.value = [
-						{
-							type: 'sequenceChar',
-							index: selections.value[0].index,
-							charIndex: 0,
-							gap: false,
-						},
-					]
-				}
-				isPlaying.value = !isPlaying.value
-			},
-		},
-		{
-			id: 'next_frame',
-			bind: ['right', 'f'],
-			perform() {
-				offsetSelection(1)
-			},
-		},
-		{
-			id: 'prev_frame',
-			bind: ['left', 'd'],
-			perform() {
-				offsetSelection(-1)
-			},
-		},
-		{
-			id: 'swap_selected_foward',
-			bind: 'command+f',
-			perform() {
-				swapSelectedGlyph(1)
-			},
-		},
-		{
-			id: 'swap_selected_backward',
-			bind: 'command+d',
-			perform() {
-				swapSelectedGlyph(-1)
-			},
-		},
-		{
-			id: 'split',
-			bind: 'command+shift+d',
-			perform() {
-				const sel = selections.value.at(0)
-				if (!sel || sel.type !== 'sequenceChar') return
-				if (!sel.gap) return
-
-				const item = project.items[sel.index]
-				if (item.type !== 'glyphSequence') return
-
-				const formerItem: Item = {
-					...item,
-					glyphs: item.glyphs.slice(0, sel.charIndex),
-				}
-
-				const latterItem: Item = {
-					...item,
-					position: vec2.add(item.position, [sel.charIndex * 40, 0]),
-					glyphs: item.glyphs.slice(sel.charIndex),
-				}
-
-				project.items.splice(sel.index, 1, formerItem, latterItem)
-			},
-		},
-		{
 			id: 'edit',
+			icon: 'material-symbols:edit',
 			children: [
 				{
 					id: 'copy',
@@ -450,10 +318,154 @@ export const useAppStateStore = defineStore('appState', () => {
 						}
 					},
 				},
+				{
+					id: 'deselect',
+					bind: 'esc',
+					icon: 'f7:escape',
+					perform() {
+						selections.value = []
+					},
+				},
+				{
+					id: 'delete',
+					bind: 'backspace',
+					icon: 'material-symbols:delete',
+					perform() {
+						let nextSelection: Selection[] = []
+
+						if (selections.value.length === 1) {
+							const sel = selections.value[0]
+							if (sel.type === 'sequenceChar' && !sel.gap) {
+								const {index, charIndex} = sel
+								const item = project.items[index]
+
+								if (item.type === 'glyphSequence' && item.glyphs.length > 1) {
+									const nextCharIndex = Math.min(
+										charIndex,
+										item.glyphs.length - 2
+									)
+									nextSelection = [
+										{
+											type: 'sequenceChar',
+											index,
+											charIndex: nextCharIndex,
+											gap: false,
+										},
+									]
+								}
+							}
+						}
+
+						// Sort selections by index in descending order
+						const sels = selections.value.slice().sort((a, b) => {
+							if (a.type === 'sequenceChar' && b.type === 'sequenceChar') {
+								if (a.index === b.index) {
+									return b.charIndex - a.charIndex
+								}
+							}
+							return b.index - a.index
+						})
+
+						for (const selection of sels) {
+							if (selection.type === 'item') {
+								project.items.splice(selection.index, 1)
+								selections.value = []
+							} else if (selection.type === 'sequenceChar' && !selection.gap) {
+								const item = project.items[selection.index]
+								if (item.type === 'glyphSequence') {
+									item.glyphs.splice(selection.charIndex, 1)
+									if (item.glyphs.length === 0) {
+										project.items.splice(selection.index, 1)
+										selections.value = []
+									}
+								}
+							}
+						}
+
+						selections.value = nextSelection
+					},
+				},
 			],
 		},
 		{
+			id: 'toggle_play',
+			icon: 'mdi:play',
+			bind: ['space'],
+			perform() {
+				if (selections.value[0]?.type === 'item') {
+					selections.value = [
+						{
+							type: 'sequenceChar',
+							index: selections.value[0].index,
+							charIndex: 0,
+							gap: false,
+						},
+					]
+				}
+				isPlaying.value = !isPlaying.value
+			},
+		},
+		{
+			id: 'next_frame',
+			icon: 'fluent:arrow-step-in-right-12-filled',
+			bind: ['right', 'f'],
+			perform() {
+				offsetSelection(1)
+			},
+		},
+		{
+			id: 'prev_frame',
+			icon: 'fluent:arrow-step-in-left-12-filled',
+			bind: ['left', 'd'],
+			perform() {
+				offsetSelection(-1)
+			},
+		},
+		{
+			id: 'swap_selected_foward',
+			bind: 'command+f',
+			icon: 'tdesign:swap-right',
+			perform() {
+				swapSelectedGlyph(1)
+			},
+		},
+		{
+			id: 'swap_selected_backward',
+			bind: 'command+d',
+			icon: 'tdesign:swap-left',
+			perform() {
+				swapSelectedGlyph(-1)
+			},
+		},
+		{
+			id: 'split',
+			bind: 'command+shift+d',
+			icon: 'ant-design:split-cells-outlined',
+			perform() {
+				const sel = selections.value.at(0)
+				if (!sel || sel.type !== 'sequenceChar') return
+				if (!sel.gap) return
+
+				const item = project.items[sel.index]
+				if (item.type !== 'glyphSequence') return
+
+				const formerItem: Item = {
+					...item,
+					glyphs: item.glyphs.slice(0, sel.charIndex),
+				}
+
+				const latterItem: Item = {
+					...item,
+					position: vec2.add(item.position, [sel.charIndex * 40, 0]),
+					glyphs: item.glyphs.slice(sel.charIndex),
+				}
+
+				project.items.splice(sel.index, 1, formerItem, latterItem)
+			},
+		},
+		{
 			id: 'increase_duration',
+			icon: 'uil:shrink',
 			bind: ['command+up', 'e'],
 			perform() {
 				offsetSelectedGlyphsDuration(1)
@@ -461,6 +473,7 @@ export const useAppStateStore = defineStore('appState', () => {
 		},
 		{
 			id: 'decrease_duration',
+			icon: 'uil:arrows-shrink-h',
 			bind: ['command+down', 's'],
 			perform() {
 				offsetSelectedGlyphsDuration(-1)
