@@ -4,7 +4,7 @@ import {useTweeq} from 'tweeq'
 export const useSettingsStore = defineStore('settings', () => {
 	const Tq = useTweeq()
 
-	const apiURL = Tq.config.ref('apiURL', 'http://baku89.com/unim/api/v1')
+	const apiURL = Tq.config.ref('apiURL', 'https://baku89.com/unim/api/v1')
 
 	Tq.actions.register([
 		{
