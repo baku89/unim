@@ -8,7 +8,7 @@ export interface Glyph {
 	/** 元のグリフから編集されているか */
 	modified: boolean
 	/** コードポイント */
-	code: number | number[]
+	code: number[]
 	/** インデックス */
 	index: number
 	/** Unicodeの名前 */

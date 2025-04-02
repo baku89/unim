@@ -25,13 +25,12 @@ interface SearchResponseResult {
 }
 
 export interface GlyphInfo {
-	code_num: number[]
+	code: number[]
 	code_str: string
 	font: string
 	name: string
 	index: number
 	path: string
-	type: 'original' | 'skeleton' | 'island'
 }
 
 interface GlyphInfoSimilarity extends GlyphInfo {
@@ -43,20 +42,16 @@ export function toGlyph(
 ): Glyph {
 	info = toRaw(info)
 
-	if ('code_num' in info) {
-		return {
-			path: info.path,
-			transform: info.transform ?? mat2d.I,
-			modified: false,
-			code: info.code_num,
-			index: info.index,
-			name: info.name,
-			font: info.font,
-			duration: info.duration ?? 1,
-			meta: {},
-		}
-	} else {
-		return info
+	return {
+		path: info.path,
+		transform: info.transform ?? mat2d.I,
+		modified: false,
+		code: info.code,
+		index: info.index,
+		name: info.name,
+		font: info.font,
+		duration: info.duration ?? 1,
+		meta: {},
 	}
 }
 
