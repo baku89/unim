@@ -86,13 +86,13 @@ export const useProjectStore = defineStore('project', () => {
 		items: [],
 	})
 
-	const savedProject = localStorage.getItem('project')
+	const savedProject = localStorage.getItem('com.baku89.unim.project')
 	if (savedProject) {
 		Object.assign(project, JSON.parse(savedProject))
 	}
 
 	watchEffect(() => {
-		localStorage.setItem('project', JSON.stringify(project))
+		localStorage.setItem('com.baku89.unim.project', JSON.stringify(project))
 	})
 
 	return {
