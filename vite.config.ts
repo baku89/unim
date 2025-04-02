@@ -36,7 +36,7 @@ export default defineConfig({
 		}),
 	],
 	build: {
-		sourcemap: true,
+		sourcemap: 'inline',
 	},
 	resolve: {
 		alias: [
