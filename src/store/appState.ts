@@ -195,8 +195,6 @@ export const useAppStateStore = defineStore('appState', () => {
 						// deep clone the selected glyphs
 						const glyphs = JSON.parse(JSON.stringify(selectedGlyphs.value))
 
-						console.log(glyphs)
-
 						copiedGlyphs.value = {
 							aeKeyframeData,
 							glyphs,

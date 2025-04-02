@@ -1,10 +1,10 @@
-import { defineStore } from 'pinia'
+import {defineStore} from 'pinia'
 import {useTweeq} from 'tweeq'
 
 export const useSettingsStore = defineStore('settings', () => {
 	const Tq = useTweeq()
 
-	const apiURL = Tq.config.ref('apiURL', 'http://localhost:8123')
+	const apiURL = Tq.config.ref('apiURL', 'http://baku89.com/unim/api/v1')
 
 	Tq.actions.register([
 		{
