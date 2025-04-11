@@ -4,9 +4,11 @@ import {Rect} from 'geome'
 import * as Tq from 'tweeq'
 import {computed, shallowRef} from 'vue'
 
+import {useSettingsStore} from '@/store/settings'
 import {useViewportStore} from '@/store/viewport'
 
 const viewport = useViewportStore()
+const settings = useSettingsStore()
 
 const paneSize = shallowRef<vec2>([0, 0])
 
@@ -19,6 +21,10 @@ const transform = computed<mat2d>(() => {
 	} else {
 		return viewport.transform
 	}
+})
+
+const transformGlyph = computed(() => {
+	return `translate(${settings.position[0]}, ${settings.position[1]}) rotate(${settings.rotation}) scale(${settings.scale / 100})`
 })
 </script>
 
@@ -39,6 +45,7 @@ const transform = computed<mat2d>(() => {
 					:d="shape.path"
 					v-bind="{fill: 'none', ...shape.style}"
 					:key="index"
+					:transform="transformGlyph"
 				/>
 			</svg>
 		</Tq.PaneZUI>

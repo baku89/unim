@@ -11,7 +11,7 @@ const viewport = useViewportStore()
 </script>
 
 <template>
-	<Tq.TitleBar name="Unim" icon="favicon.svg">
+	<Tq.TitleBar name="Unimate" icon="favicon.svg">
 		<template #center>
 			<Tq.InputGroup>
 				<Tq.InputCheckbox

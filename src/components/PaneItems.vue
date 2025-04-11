@@ -8,12 +8,13 @@ import * as Tq from 'tweeq'
 import {ref, shallowRef} from 'vue'
 
 import {useAppStateStore} from '@/store/appState'
-
+import {useSettingsStore} from '@/store/settings'
 import {useProjectStore} from '../store/project'
 import ItemGlyphSequence from './ItemGlyphSequence.vue'
 
 const project = useProjectStore()
 const appState = useAppStateStore()
+const settings = useSettingsStore()
 
 const $root = ref<HTMLElement | null>(null)
 
@@ -95,6 +96,25 @@ function onSelectItem(
 				/>
 			</template>
 		</Tq.PaneZUI>
+		<Tq.PaneExpandable icon="mdi:gear">
+			<Tq.ParameterGrid>
+				<Tq.ParameterHeading>Transform</Tq.ParameterHeading>
+				<Tq.Parameter label="Position">
+					<Tq.InputPosition v-model="settings.position" />
+				</Tq.Parameter>
+				<Tq.Parameter label="Rotation">
+					<Tq.InputAngle v-model="settings.rotation" />
+				</Tq.Parameter>
+				<Tq.Parameter label="Scale">
+					<Tq.InputNumber
+						v-model="settings.scale"
+						:min="0"
+						:max="200"
+						suffix="%"
+					/>
+				</Tq.Parameter>
+			</Tq.ParameterGrid>
+		</Tq.PaneExpandable>
 	</div>
 </template>
 
